@@ -15,6 +15,18 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+// Auto-Logout on Token Expiry or Invalid Token
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            localStorage.removeItem('movie_user');
+            window.location.reload(); // Force refresh to Auth state
+        }
+        return Promise.reject(error);
+    }
+);
+
 export const authService = {
     async login(email, password) {
         const response = await api.post('/auth/login', { email, password });
