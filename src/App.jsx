@@ -96,7 +96,7 @@ function App() {
 
   // Notification State
   const [notifications, setNotifications] = useState([
-    { id: 1, title: "Welcome!", message: "Thanks for choosing Movie Magic. Your journey starts here.", time: "1m ago", type: "info" }
+    { id: 1, title: "Welcome!", message: "Thanks for choosing Movie Show. Your journey starts here.", time: "1m ago", type: "info" }
   ])
   const [activeToast, setActiveToast] = useState(null)
   const [showNotifications, setShowNotifications] = useState(false)
