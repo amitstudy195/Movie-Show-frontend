@@ -90,11 +90,15 @@ function App() {
       navigator.geolocation.getCurrentPosition(async (position) => {
         try {
           const { latitude, longitude } = position.coords;
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`);
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1&accept-language=en`);
           const data = await response.json();
-          const detectedCity = data.address.city || data.address.town || data.address.state_district;
+          
+          let detectedCity = data.address.city || data.address.town || data.address.suburb || data.address.state_district || data.address.state;
           
           if (detectedCity) {
+            // Clean up name: Remove "District", "Jila", etc. to keep it simple
+            detectedCity = detectedCity.replace(/ District| Jila| Division| Circle/gi, "").trim();
+            
             setSelectedCity(detectedCity);
             localStorage.setItem('movie_city', detectedCity);
             addNotification({
