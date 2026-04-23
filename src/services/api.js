@@ -62,6 +62,10 @@ export const bookingService = {
         const response = await api.get('/bookings/my');
         return response.data;
     },
+    async getAllBookings() {
+        const response = await api.get('/bookings');
+        return response.data;
+    },
     async cancelBooking(id) {
         const response = await api.delete(`/bookings/${id}`);
         return response.data;

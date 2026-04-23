@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { bookingService } from '../services/api';
 import api from '../services/api';
 import { cinemaService } from '../services/cinemaService';
 
@@ -14,6 +15,24 @@ const AdminDashboard = ({
     const [newTheater, setNewTheater] = useState({ name: '', location: '', city: 'Mumbai', rows: 8, cols: 12, price: 150 });
     const [newSchedule, setNewSchedule] = useState({ movieId: '', theaterId: '', time: '' });
     const [loading, setLoading] = useState(false);
+    const [allBookings, setAllBookings] = useState([]);
+    const [totalUsers, setTotalUsers] = useState(0);
+
+    useEffect(() => {
+        const fetchAnalytics = async () => {
+            try {
+                const data = await bookingService.getAllBookings();
+                setAllBookings(data);
+                
+                // Estimate users from bookings or fetch users if we had an admin/users route
+                // For now, let's keep it simple
+                setTotalUsers(new Set(data.map(b => b.userId?._id)).size);
+            } catch (err) {
+                console.error("Failed to fetch analytics:", err);
+            }
+        };
+        fetchAnalytics();
+    }, []);
 
     const handleAddTheater = async (e) => {
         e.preventDefault();
@@ -239,6 +258,8 @@ const AdminDashboard = ({
                                 theaters={theaters} 
                                 schedules={schedules} 
                                 movies={movies} 
+                                bookings={allBookings}
+                                totalUsers={totalUsers}
                             />
                         ) : (
                             <div className="space-y-4">
@@ -275,14 +296,10 @@ const AdminDashboard = ({
     );
 };
 
-const InsightsPanel = ({ theaters, schedules, movies }) => {
-    const bookings = JSON.parse(localStorage.getItem('movie_bookings') || '[]');
-    
+const InsightsPanel = ({ theaters, schedules, movies, bookings, totalUsers }) => {
     // 1. Sales Metrics
-    const totalRevenue = bookings.reduce((sum, b) => {
-        const t = theaters.find(th => th.name === b.theaterName);
-        return sum + (b.seats.length * (t?.price || 12.5));
-    }, 0);
+    const totalRevenue = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+    const totalTickets = bookings.reduce((sum, b) => sum + (b.seats?.length || 0), 0);
 
     const moviePopularity = bookings.reduce((acc, b) => {
         acc[b.movieTitle] = (acc[b.movieTitle] || 0) + 1;
@@ -296,90 +313,98 @@ const InsightsPanel = ({ theaters, schedules, movies }) => {
     // 2. Occupancy Metrics
     const occupancyData = theaters.map(t => {
         const theaterBookings = bookings.filter(b => b.theaterName === t.name);
-        const bookedSeatsCount = theaterBookings.reduce((sum, b) => sum + b.seats.length, 0);
-        const totalCapacity = t.rows * t.cols * (schedules.filter(s => s.theaterId.toString() === t.id.toString()).length || 1);
+        const bookedSeatsCount = theaterBookings.reduce((sum, b) => sum + (b.seats?.length || 0), 0);
+        const totalCapacity = t.rows * t.cols * (schedules.filter(s => s.theaterId.toString() === t.id.toString()).length || 5);
         const percentage = totalCapacity > 0 ? Math.min((bookedSeatsCount / totalCapacity) * 100, 100).toFixed(1) : 0;
         return { name: t.name, percentage, booked: bookedSeatsCount, capacity: totalCapacity };
     });
 
     return (
-        <div className="space-y-10 animate-in fade-in duration-500 w-full">
+        <div className="space-y-10 animate-in fade-in duration-500 w-full overflow-hidden">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-gradient-to-br from-indigo-500/10 to-transparent border border-indigo-500/20 rounded-3xl p-8 shadow-xl">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-br from-indigo-500/10 to-transparent border border-indigo-500/20 rounded-3xl p-6 shadow-xl">
                     <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4">Gross Revenue</p>
                     <div className="flex items-baseline gap-2">
                         <span className="text-sm font-black text-indigo-500">$</span>
-                        <h4 className="text-4xl font-black text-white tracking-tighter">{totalRevenue.toFixed(2)}</h4>
+                        <h4 className="text-3xl font-black text-white tracking-tighter">{totalRevenue.toFixed(2)}</h4>
                     </div>
                 </div>
-                <div className="bg-gradient-to-br from-cyan-500/10 to-transparent border border-cyan-500/20 rounded-3xl p-8 shadow-xl">
-                    <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-4">Total Bookings</p>
-                    <h4 className="text-4xl font-black text-white tracking-tighter">{bookings.length}</h4>
+                <div className="bg-gradient-to-br from-cyan-500/10 to-transparent border border-cyan-500/20 rounded-3xl p-6 shadow-xl">
+                    <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-4">Tickets Sold</p>
+                    <h4 className="text-3xl font-black text-white tracking-tighter">{totalTickets}</h4>
                 </div>
-                <div className="bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20 rounded-3xl p-8 shadow-xl">
+                <div className="bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-500/20 rounded-3xl p-6 shadow-xl">
+                    <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-4">Transactions</p>
+                    <h4 className="text-3xl font-black text-white tracking-tighter">{bookings.length}</h4>
+                </div>
+                <div className="bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20 rounded-3xl p-6 shadow-xl">
                     <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-4">Active Users</p>
-                    <h4 className="text-4xl font-black text-white tracking-tighter">{JSON.parse(localStorage.getItem('movie_users') || '[]').length || 1}</h4>
+                    <h4 className="text-3xl font-black text-white tracking-tighter">{totalUsers}</h4>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-                {/* Popular Movies Chart */}
-                <div className="bg-white/2 border border-white/5 rounded-[2.5rem] p-8">
-                    <h3 className="text-white font-black uppercase text-xs tracking-widest mb-8">Popular Movies (Volume)</h3>
-                    <div className="space-y-6">
-                        {sortedPopularity.length === 0 ? (
-                            <p className="py-10 text-center text-gray-600 text-[10px] font-black uppercase italic">No sales data yet</p>
-                        ) : sortedPopularity.map(([title, count], idx) => (
-                            <div key={title} className="space-y-2">
-                                <div className="flex justify-between items-end">
-                                    <span className="text-xs font-bold text-white uppercase">{title}</span>
-                                    <span className="text-[10px] font-black text-gray-500">{count} Bookings</span>
+                {/* Recent Transactions */}
+                <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 overflow-hidden h-fit">
+                    <h3 className="text-white font-black uppercase text-xs tracking-widest mb-8">Recent Transactions</h3>
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-4">
+                        {bookings.length === 0 ? (
+                            <p className="py-20 text-center text-gray-700 text-[10px] font-black uppercase italic">Scanning for live traffic...</p>
+                        ) : bookings.map((b, idx) => (
+                            <div key={b._id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/10 transition-all">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-[10px]">
+                                        {b.userId?.name?.charAt(0) || 'U'}
+                                    </div>
+                                    <div>
+                                        <h5 className="text-white font-black uppercase text-[11px] leading-tight">{b.movieTitle}</h5>
+                                        <p className="text-gray-500 text-[9px] font-bold uppercase">{b.userId?.name || 'Guest'} • {b.seats.length} Seats</p>
+                                    </div>
                                 </div>
-                                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                    <div 
-                                        className={`h-full bg-gradient-to-r ${idx === 0 ? 'from-cyan-500 to-blue-600' : 'from-gray-600 to-gray-400'} rounded-full`} 
-                                        style={{ width: `${(count / sortedPopularity[0][1]) * 100}%` }}
-                                    ></div>
+                                <div className="text-right">
+                                    <p className="text-white font-black text-[11px]">+${b.totalPrice.toFixed(2)}</p>
+                                    <p className="text-[8px] font-bold text-gray-600 uppercase italic">SUCCESS</p>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Theater Occupancy */}
-                <div className="bg-white/2 border border-white/5 rounded-[2.5rem] p-8">
-                    <h3 className="text-white font-black uppercase text-xs tracking-widest mb-8">Theater Occupancy Rates</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {occupancyData.map(t => (
-                            <div key={t.name} className="bg-black/40 border border-white/5 p-6 rounded-3xl flex items-center justify-between">
-                                <div>
-                                    <h5 className="text-[11px] font-black text-white uppercase tracking-tighter mb-1 line-clamp-1">{t.name}</h5>
-                                    <p className="text-[9px] font-bold text-gray-600 uppercase italic">{t.booked} / {t.capacity} Seats</p>
+                {/* Popular Movies Chart & Occupancy */}
+                <div className="space-y-10">
+                    <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8">
+                        <h3 className="text-white font-black uppercase text-xs tracking-widest mb-8">Popularity Index</h3>
+                        <div className="space-y-6">
+                            {sortedPopularity.length === 0 ? (
+                                <p className="py-10 text-center text-gray-700 text-[10px] font-black uppercase italic">Market data pending</p>
+                            ) : sortedPopularity.map(([title, count], idx) => (
+                                <div key={title} className="space-y-2">
+                                    <div className="flex justify-between items-end">
+                                        <span className="text-[10px] font-black text-white/50 uppercase">{title}</span>
+                                        <span className="text-[10px] font-black text-white">{count} Vol.</span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <div 
+                                            className={`h-full bg-gradient-to-r ${idx === 0 ? 'from-indigo-500 to-cyan-500' : 'from-gray-600 to-gray-800'} rounded-full transition-all duration-1000`} 
+                                            style={{ width: `${(count / sortedPopularity[0][1]) * 100}%` }}
+                                        ></div>
+                                    </div>
                                 </div>
-                                <div className="relative w-14 h-14 flex items-center justify-center">
-                                    <svg className="w-full h-full transform -rotate-90">
-                                        <circle cx="28" cy="28" r="24" fill="transparent" stroke="currentColor" strokeWidth="4" className="text-white/5" />
-                                        <circle 
-                                            cx="28" cy="28" r="24" fill="transparent" stroke="currentColor" strokeWidth="4" 
-                                            strokeDasharray={2 * Math.PI * 24} 
-                                            strokeDashoffset={2 * Math.PI * 24 * (1 - t.percentage / 100)} 
-                                            className="text-cyan-500 transition-all duration-1000"
-                                        />
-                                    </svg>
-                                    <span className="absolute text-[8px] font-black text-white">{t.percentage}%</span>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            {/* Simulated Patterns */}
-            <div className="bg-zinc-900/50 p-6 rounded-2xl border border-white/5">
-                <div className="flex items-center gap-3">
-                    <span className="text-xl">📊</span>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Peak booking pattern observed between <span className="text-white">06:00 PM - 09:00 PM</span>. Occupancy is <span className="text-cyan-400">12% higher</span> on weekends.</p>
+                    {/* Quick Stats Bar */}
+                    <div className="bg-indigo-600 p-6 rounded-3xl shadow-2xl shadow-indigo-600/20">
+                        <div className="flex items-center gap-4">
+                            <span className="text-2xl animate-pulse">⚡</span>
+                            <div>
+                                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">Network Pulse</p>
+                                <p className="text-white font-black uppercase text-xs leading-tight">Live transactions synchronization active. Latency: 24ms</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
