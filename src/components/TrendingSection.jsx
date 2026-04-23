@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 
-const TrendingSection = ({ movies = [], genres = {}, onMovieClick }) => {
+const TrendingSection = ({ movies = [], genres = {}, onMovieClick, likedMovies = [], onToggleLike }) => {
   const carouselRef = useRef(null)
 
   if (!Array.isArray(movies) || movies.length === 0) return null;
@@ -79,9 +79,24 @@ const TrendingSection = ({ movies = [], genres = {}, onMovieClick }) => {
                 <div className="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-[10px] font-black px-3 py-1 rounded-full shadow-lg border-2 border-yellow-300">
                   #{index + 1}
                 </div>
-                <div className="absolute bottom-3 right-3 bg-gradient-to-r from-green-400 to-blue-500 text-white text-[9px] font-black px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
+                <div className="absolute top-3 right-3 bg-gradient-to-r from-green-400 to-blue-500 text-white text-[9px] font-black px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
                    {movie.vote_average.toFixed(1)}
                 </div>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleLike(movie.id);
+                  }}
+                  className={`absolute bottom-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 group-hover:opacity-100 ${
+                    likedMovies.includes(movie.id.toString()) || likedMovies.includes(movie.id)
+                      ? 'bg-red-500 text-white scale-110 opacity-100' 
+                      : 'bg-black/60 text-white hover:bg-white hover:text-red-500'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.5 3c1.263 0 2.426.465 3.317 1.235A5.95 5.95 0 0112 5.25a5.95 5.95 0 011.183-1.015A5.961 5.961 0 0116.5 3c2.786 0 5.25 2.322 5.25 5.25 0 3.924-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                  </svg>
+                </button>
               </div>
               <div className="px-1 space-y-1">
                 <h3 className="text-white font-bold text-sm truncate group-hover:text-yellow-400 transition-colors uppercase tracking-tight italic">{movie.title}</h3>

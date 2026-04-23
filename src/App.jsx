@@ -13,6 +13,7 @@ import BookingFlow from './components/BookingFlow'
 import LocationModal from './components/LocationModal'
 import NotificationSystem, { NotificationToast } from './components/NotificationSystem'
 import { cinemaService } from './services/cinemaService'
+import { authService } from './services/api'
 
 const AdminRoute = ({ children, user, addNotification }) => {
   useEffect(() => {
@@ -52,6 +53,28 @@ function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [bookingMovie, setBookingMovie] = useState(null)
+  
+  // Engagement State
+  const [likedMovies, setLikedMovies] = useState([])
+  const [votedMovies, setVotedMovies] = useState([])
+
+  const syncProfile = useCallback(async () => {
+    if (localStorage.getItem('movie_user')) {
+      try {
+        const profile = await authService.getProfile();
+        setLikedMovies(profile.likedMovies || []);
+        setVotedMovies(profile.votedMovies || []);
+        
+        // Update user storage if name/email changed or etc
+        const current = JSON.parse(localStorage.getItem('movie_user'));
+        const updated = { ...current, ...profile };
+        localStorage.setItem('movie_user', JSON.stringify(updated));
+        setUser(updated);
+      } catch (err) {
+        console.error("Profile sync failed:", err);
+      }
+    }
+  }, []);
   
   const [selectedCity, setSelectedCity] = useState(() => {
     return localStorage.getItem('movie_city') || 'Mumbai'
@@ -129,7 +152,8 @@ function App() {
         loadGenres(),
         loadTrendingMovies(),
         cinemaService.fetchTheaters(selectedCity).then(setTheaters),
-        cinemaService.fetchSchedules().then(setSchedules)
+        cinemaService.fetchSchedules().then(setSchedules),
+        syncProfile()
       ])
       setIsSyncing(false)
     }
@@ -159,6 +183,45 @@ function App() {
     };
     syncCity();
   }, [selectedCity]);
+
+  const handleToggleLike = async (movieId) => {
+    if (!user) {
+        setIsAuthOpen(true);
+        addNotification({ title: "Login Required", message: "Sign in to heart your favorites!", type: "info" });
+        return;
+    }
+    try {
+        const updatedLikes = await authService.toggleLike(movieId);
+        setLikedMovies(updatedLikes);
+        
+        const isLiked = updatedLikes.includes(movieId.toString());
+        addNotification({
+            title: isLiked ? "Added to Favorites" : "Removed from Favorites",
+            message: isLiked ? "Movie saved to your cinematic vault." : "Movie removed from your vault.",
+            type: isLiked ? "success" : "info"
+        });
+    } catch (err) {
+        addNotification({ title: "Action Failed", message: "Network interference detected.", type: "alert" });
+    }
+  };
+
+  const handleRateMovie = async (movieId, rating) => {
+    if (!user) {
+        setIsAuthOpen(true);
+        return;
+    }
+    try {
+        const updatedVotes = await authService.submitRating(movieId, rating);
+        setVotedMovies(updatedVotes);
+        addNotification({
+            title: "Rating Recorded",
+            message: `You gave this movie ${rating} stars.`,
+            type: "success"
+        });
+    } catch (err) {
+        addNotification({ title: "Rating Failed", message: "Check your connection.", type: "alert" });
+    }
+  };
 
   useEffect(() => {
     setCurrentPage(1)
@@ -316,6 +379,8 @@ function App() {
               movies={trendingMovies}
               genres={genres}
               onMovieClick={openTrailer}
+              likedMovies={likedMovies}
+              onToggleLike={handleToggleLike}
             />
           )}
           
@@ -341,6 +406,8 @@ function App() {
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
+            likedMovies={likedMovies}
+            onToggleLike={handleToggleLike}
           />
           
           <MovieDetailsModal
@@ -365,6 +432,10 @@ function App() {
             allTheaters={theaters}
             allSchedules={schedules}
             addNotification={addNotification}
+            likedMovies={likedMovies}
+            votedMovies={votedMovies}
+            onToggleLike={handleToggleLike}
+            onRateMovie={handleRateMovie}
           />
 
           {bookingMovie && (

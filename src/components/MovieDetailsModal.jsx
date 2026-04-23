@@ -14,12 +14,15 @@ const MovieDetailsModal = ({
   onBookTickets,
   allTheaters,
   allSchedules,
-  addNotification
+  addNotification,
+  likedMovies = [],
+  votedMovies = [],
+  onToggleLike,
+  onRateMovie
 }) => {
   const [movie, setMovie] = useState(null)
   const [trailerUrl, setTrailerUrl] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(false) // Favorites state
 
   const [reviews, setReviews] = useState([])
   const [newReviewText, setNewReviewText] = useState('')
@@ -33,7 +36,6 @@ const MovieDetailsModal = ({
       document.body.style.overflow = 'hidden' // Disable body scroll
       loadMovieDetails(movieId)
       loadReviews(movieId)
-      checkIfFavorite(movieId)
     } else {
       document.body.style.overflow = 'unset' // Enable body scroll
       setMovie(null)
@@ -63,27 +65,6 @@ const MovieDetailsModal = ({
       console.error("Error fetching details:", err)
     } finally {
       setLoading(false)
-    }
-  }
-
-  // --- Favorites Logic ---
-  const checkIfFavorite = (id) => {
-    const savedFavs = JSON.parse(localStorage.getItem('movie_favorites') || '[]')
-    setIsFavorite(savedFavs.includes(id))
-  }
-
-  const toggleFavorite = () => {
-    if (!movieId) return
-    const savedFavs = JSON.parse(localStorage.getItem('movie_favorites') || '[]')
-
-    if (isFavorite) {
-      const newFavs = savedFavs.filter((favId) => favId !== movieId)
-      localStorage.setItem('movie_favorites', JSON.stringify(newFavs))
-      setIsFavorite(false)
-    } else {
-      savedFavs.push(movieId)
-      localStorage.setItem('movie_favorites', JSON.stringify(savedFavs))
-      setIsFavorite(true)
     }
   }
 
@@ -219,7 +200,47 @@ const MovieDetailsModal = ({
                                     <span className="text-yellow-400 text-lg">❤️</span>
                                     <span className="text-white font-black text-xl">{Math.round(movie.vote_average * 10)}%</span>
                                 </div>
+                                <div className="flex items-center gap-4 bg-white/5 px-4 py-1.5 rounded-xl border border-white/10 ml-2">
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); onToggleLike(movie.id); }}
+                                        className={`flex items-center gap-2 group transition-all duration-300 ${
+                                            likedMovies.includes(movie.id.toString()) || likedMovies.includes(movie.id)
+                                                ? 'text-red-500' : 'text-gray-400 hover:text-white'
+                                        }`}
+                                    >
+                                        <svg className={`w-5 h-5 ${likedMovies.includes(movie.id.toString()) || likedMovies.includes(movie.id) ? 'fill-current' : 'fill-none stroke-current'}`} strokeWidth="2" viewBox="0 0 24 24">
+                                            <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.5 3c1.263 0 2.426.465 3.317 1.235A5.95 5.95 0 0112 5.25a5.95 5.95 0 011.183-1.015A5.961 5.961 0 0116.5 3c2.786 0 5.25 2.322 5.25 5.25 0 3.924-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                                        </svg>
+                                        <span className="text-[10px] font-black uppercase tracking-widest">{likedMovies.includes(movie.id.toString()) || likedMovies.includes(movie.id) ? 'Hearted' : 'Heart'}</span>
+                                    </button>
+                                </div>
                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-2">Votes • {movie.vote_count}</p>
+                            </div>
+
+                            {/* User Voting Section */}
+                            <div className="flex flex-col gap-2 pt-2">
+                                <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.2em]">Cine-Rating Protocol</p>
+                                <div className="flex items-center gap-1">
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => {
+                                        const userRating = votedMovies.find(v => v.movieId === movie.id.toString())?.rating;
+                                        return (
+                                            <button 
+                                                key={star}
+                                                onClick={() => onRateMovie(movie.id, star)}
+                                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 border ${
+                                                    userRating >= star 
+                                                        ? 'bg-yellow-400 text-black border-yellow-300 shadow-lg shadow-yellow-400/20' 
+                                                        : 'bg-white/5 text-gray-600 border-white/5 hover:border-white/20 hover:text-white'
+                                                }`}
+                                            >
+                                                <span className="text-[10px] font-black">{star}</span>
+                                            </button>
+                                        );
+                                    })}
+                                    {votedMovies.find(v => v.movieId === movie.id.toString()) && (
+                                        <span className="ml-4 text-[10px] font-black text-yellow-400 uppercase tracking-widest italic animate-pulse">Ranked</span>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex flex-wrap gap-2 py-2">
