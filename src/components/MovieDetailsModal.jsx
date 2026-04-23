@@ -197,8 +197,10 @@ const MovieDetailsModal = ({
                             <h1 className="text-3xl font-black text-white leading-tight italic uppercase tracking-tighter">{movie.title}</h1>
                             <div className="flex items-center gap-2">
                                 <div className="flex items-center gap-1 bg-white/10 px-3 py-1.5 rounded-lg border border-white/5">
-                                    <span className="text-yellow-400 text-lg">❤️</span>
-                                    <span className="text-white font-black text-xl">{Math.round(movie.vote_average * 10)}%</span>
+                                    <span className={`text-lg transition-transform duration-300 ${likedMovies.includes(movie.id.toString()) || likedMovies.includes(movie.id) ? 'scale-125 text-red-500' : 'text-yellow-400'}`}>❤️</span>
+                                    <span className="text-white font-black text-xl">
+                                        {Math.round(movie.vote_average * 10) + (likedMovies.includes(movie.id.toString()) || likedMovies.includes(movie.id) ? 1 : 0)}%
+                                    </span>
                                 </div>
                                 <div className="flex items-center gap-4 bg-white/5 px-4 py-1.5 rounded-xl border border-white/10 ml-2">
                                     <button 
@@ -208,39 +210,15 @@ const MovieDetailsModal = ({
                                                 ? 'text-red-500' : 'text-gray-400 hover:text-white'
                                         }`}
                                     >
-                                        <svg className={`w-5 h-5 ${likedMovies.includes(movie.id.toString()) || likedMovies.includes(movie.id) ? 'fill-current' : 'fill-none stroke-current'}`} strokeWidth="2" viewBox="0 0 24 24">
+                                        <svg className={`w-5 h-5 ${likedMovies.includes(movie.id.toString()) || likedMovies.includes(movie.id) ? 'fill-current animate-bounce' : 'fill-none stroke-current'}`} strokeWidth="2" viewBox="0 0 24 24">
                                             <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.5 3c1.263 0 2.426.465 3.317 1.235A5.95 5.95 0 0112 5.25a5.95 5.95 0 011.183-1.015A5.961 5.961 0 0116.5 3c2.786 0 5.25 2.322 5.25 5.25 0 3.924-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
                                         </svg>
                                         <span className="text-[10px] font-black uppercase tracking-widest">{likedMovies.includes(movie.id.toString()) || likedMovies.includes(movie.id) ? 'Hearted' : 'Heart'}</span>
                                     </button>
                                 </div>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-2">Votes • {movie.vote_count}</p>
-                            </div>
-
-                            {/* User Voting Section */}
-                            <div className="flex flex-col gap-2 pt-2">
-                                <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.2em]">Cine-Rating Protocol</p>
-                                <div className="flex items-center gap-1">
-                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => {
-                                        const userRating = votedMovies.find(v => v.movieId === movie.id.toString())?.rating;
-                                        return (
-                                            <button 
-                                                key={star}
-                                                onClick={() => onRateMovie(movie.id, star)}
-                                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 border ${
-                                                    userRating >= star 
-                                                        ? 'bg-yellow-400 text-black border-yellow-300 shadow-lg shadow-yellow-400/20' 
-                                                        : 'bg-white/5 text-gray-600 border-white/5 hover:border-white/20 hover:text-white'
-                                                }`}
-                                            >
-                                                <span className="text-[10px] font-black">{star}</span>
-                                            </button>
-                                        );
-                                    })}
-                                    {votedMovies.find(v => v.movieId === movie.id.toString()) && (
-                                        <span className="ml-4 text-[10px] font-black text-yellow-400 uppercase tracking-widest italic animate-pulse">Ranked</span>
-                                    )}
-                                </div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-2">
+                                    Votes • {movie.vote_count + (likedMovies.includes(movie.id.toString()) || likedMovies.includes(movie.id) ? 1 : 0)}
+                                </p>
                             </div>
 
                             <div className="flex flex-wrap gap-2 py-2">

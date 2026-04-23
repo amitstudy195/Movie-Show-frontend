@@ -62,14 +62,16 @@ function App() {
     if (localStorage.getItem('movie_user')) {
       try {
         const profile = await authService.getProfile();
-        setLikedMovies(profile.likedMovies || []);
-        setVotedMovies(profile.votedMovies || []);
-        
-        // Update user storage if name/email changed or etc
-        const current = JSON.parse(localStorage.getItem('movie_user'));
-        const updated = { ...current, ...profile };
-        localStorage.setItem('movie_user', JSON.stringify(updated));
-        setUser(updated);
+        if (profile) {
+            setLikedMovies(profile.likedMovies || []);
+            setVotedMovies(profile.votedMovies || []);
+            
+            // Update user storage if name/email changed or etc
+            const current = JSON.parse(localStorage.getItem('movie_user'));
+            const updated = { ...current, ...profile };
+            localStorage.setItem('movie_user', JSON.stringify(updated));
+            setUser(updated);
+        }
       } catch (err) {
         console.error("Profile sync failed:", err);
       }
