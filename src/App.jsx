@@ -67,7 +67,7 @@ function App() {
             setVotedMovies(profile.votedMovies || []);
             
             // Update user storage if name/email changed or etc
-            const current = JSON.parse(localStorage.getItem('movie_user'));
+            const current = JSON.parse(localStorage.getItem('movie_user')) || {};
             const updated = { ...current, ...profile };
             localStorage.setItem('movie_user', JSON.stringify(updated));
             setUser(updated);
