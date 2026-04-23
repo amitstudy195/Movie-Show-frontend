@@ -121,7 +121,7 @@ const AdminDashboard = ({
                                             onChange={(e) => setNewSchedule({...newSchedule, time: e.target.value})}
                                         />
                                     </div>
-                                    <button className="w-full py-4 bg-white text-black font-black rounded-2xl hover:bg-cyan-400 transition-all uppercase text-xs mt-4">
+                                    <button type="submit" className="w-full py-4 bg-white text-black font-black rounded-2xl hover:bg-cyan-400 transition-all uppercase text-xs mt-4">
                                         Add to Schedule
                                     </button>
                                 </form>
@@ -168,7 +168,7 @@ const AdminDashboard = ({
                                             onChange={(e) => setNewTheater({...newTheater, price: parseFloat(e.target.value)})}
                                         />
                                     </div>
-                                    <button className="w-full py-4 bg-white text-black font-black rounded-2xl hover:bg-purple-500 hover:text-white transition-all uppercase text-xs mt-4">
+                                    <button type="submit" className="w-full py-4 bg-white text-black font-black rounded-2xl hover:bg-purple-500 hover:text-white transition-all uppercase text-xs mt-4">
                                         Create Theater
                                     </button>
                                 </form>
