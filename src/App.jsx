@@ -285,6 +285,7 @@ function App() {
   const handleLogin = (userData) => {
     setUser(userData)
     localStorage.setItem('movie_user', JSON.stringify(userData))
+    syncProfile()
     addNotification({
         title: "Signed In",
         message: `Welcome back, ${userData.name}!`,
