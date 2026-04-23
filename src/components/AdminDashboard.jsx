@@ -1,32 +1,53 @@
 import React, { useState } from 'react';
+import api from '../services/api';
+import { cinemaService } from '../services/cinemaService';
 
 const AdminDashboard = ({ 
-    theaters, 
-    setTheaters, 
-    schedules, 
-    setSchedules, 
-    movies, 
+    allTheaters: theaters, 
+    setAllTheaters: setTheaters, 
+    allSchedules: schedules, 
+    setAllSchedules: setSchedules, 
+    allMovies: movies, 
     onClose 
 }) => {
     const [activeTab, setActiveTab] = useState('schedules');
-    const [newTheater, setNewTheater] = useState({ name: '', location: '', rows: 8, cols: 12, price: 12.50 });
+    const [newTheater, setNewTheater] = useState({ name: '', location: '', city: 'Mumbai', rows: 8, cols: 12, price: 150 });
     const [newSchedule, setNewSchedule] = useState({ movieId: '', theaterId: '', time: '' });
+    const [loading, setLoading] = useState(false);
 
-    const handleAddTheater = (e) => {
+    const handleAddTheater = async (e) => {
         e.preventDefault();
-        const id = Date.now();
-        setTheaters([...theaters, { ...newTheater, id, formats: ['2D', '3D'] }]);
-        setNewTheater({ name: '', location: '', rows: 8, cols: 12, price: 12.50 });
+        setLoading(true);
+        try {
+            const response = await api.post('/theaters', {
+                ...newTheater,
+                formats: ['2D', '3D', 'IMAX']
+            });
+            setTheaters([...theaters, response.data]);
+            setNewTheater({ name: '', location: '', city: 'Mumbai', rows: 8, cols: 12, price: 150 });
+        } catch (err) {
+            console.error("Failed to add theater:", err);
+            alert("Security: Only admins can perform this protocol.");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleAddSchedule = (e) => {
+    const handleAddSchedule = async (e) => {
         e.preventDefault();
-        setSchedules([...schedules, { ...newSchedule, id: Date.now() }]);
+        const updatedSchedules = [...schedules, { ...newSchedule, id: Date.now() }];
+        setSchedules(updatedSchedules);
+        
+        // Persist schedules to local storage (since backend model doesn't exist yet)
+        await cinemaService.syncData(theaters, updatedSchedules);
+        
         setNewSchedule({ movieId: '', theaterId: '', time: '' });
     };
 
-    const handleRemoveSchedule = (id) => {
-        setSchedules(schedules.filter(s => s.id !== id));
+    const handleRemoveSchedule = async (id) => {
+        const updatedSchedules = schedules.filter(s => s.id !== id);
+        setSchedules(updatedSchedules);
+        await cinemaService.syncData(theaters, updatedSchedules);
     };
 
     return (
@@ -138,6 +159,12 @@ const AdminDashboard = ({
                                         className="w-full bg-zinc-900 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-purple-500 transition-all font-bold"
                                         value={newTheater.name}
                                         onChange={(e) => setNewTheater({...newTheater, name: e.target.value})}
+                                    />
+                                    <input 
+                                        type="text" required placeholder="City (e.g. Patna, Mumbai)"
+                                        className="w-full bg-zinc-900 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-purple-500 transition-all font-bold"
+                                        value={newTheater.city}
+                                        onChange={(e) => setNewTheater({...newTheater, city: e.target.value})}
                                     />
                                     <input 
                                         type="text" required placeholder="Location"
