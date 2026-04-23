@@ -12,7 +12,7 @@ const MyBookings = ({ onClose, user }) => {
     const fetchBookings = async () => {
         try {
             const data = await bookingService.getMyBookings();
-            setBookings(data.filter(b => b.status === 'confirmed'));
+            setBookings(data);
         } catch (err) {
             console.error('Failed to fetch bookings:', err);
         } finally {
@@ -146,7 +146,7 @@ const MyBookings = ({ onClose, user }) => {
             
             /* Image specific */
             img { object-fit: cover !important; }
-            [class*="bg-[repeating-conic-gradient"], .qr-pattern {
+            .qr-pattern {
                 background-image: repeating-conic-gradient(#000 0% 25%, #fff 0% 50%) !important;
                 background-size: 10px 10px !important;
                 display: block !important;
@@ -218,7 +218,12 @@ const MyBookings = ({ onClose, user }) => {
                             <img src={booking.posterPath} className="w-full h-full object-cover" alt={booking.movieTitle} />
                         </div>
                         <div className="flex flex-col justify-center">
-                            <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-2 group-hover:text-cyan-400 transition-colors">{booking.movieTitle}</h3>
+                            <div className="flex items-center gap-3 mb-2">
+                                <h3 className="text-2xl font-black text-white uppercase tracking-tight group-hover:text-cyan-400 transition-colors leading-none">{booking.movieTitle}</h3>
+                                <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${booking.status === 'confirmed' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-orange-500/10 text-orange-500 border border-orange-500/20 animate-pulse'}`}>
+                                    {booking.status === 'confirmed' ? 'Confirmed' : 'Pending'}
+                                </span>
+                            </div>
                             <div className="space-y-1">
                                 <p className="text-gray-400 text-sm flex items-center gap-2">
                                     <span className="text-cyan-500 font-black">@</span> {booking.theaterName}
@@ -288,7 +293,7 @@ const MyBookings = ({ onClose, user }) => {
                         <div className="absolute top-1/2 left-8 right-8 h-[2px] border-b border-dashed border-white/10 print-hide"></div>
 
                         <div className="text-center mb-10">
-                            <div className="w-20 h-20 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full mx-auto flex items-center justify-center mb-4 border-4 border-zinc-800 shadow-2xl">
+                            <div className="w-20 h-20 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-3xl mx-auto flex items-center justify-center mb-4 border-4 border-zinc-800 shadow-2xl">
                                 <span className="text-3xl tracking-tighter font-black text-white">MS</span>
                             </div>
                             <h4 className="text-white font-black text-2xl uppercase tracking-tighter">Official E-Ticket</h4>
@@ -335,7 +340,7 @@ const MyBookings = ({ onClose, user }) => {
 
                         <div className="flex flex-col items-center gap-4">
                             <div className="w-40 h-40 bg-white p-4 rounded-3xl shadow-xl mb-2 border border-gray-100">
-                                <div className="w-full h-full bg-[repeating-conic-gradient(#000_0%_25%,#fff_0%_50%)] bg-[length:10px_10px] opacity-80"></div>
+                                <div className="w-full h-full bg-[repeating-conic-gradient(#000_0%_25%,#fff_0%_50%)] bg-[length:10px_10px] opacity-80 qr-pattern"></div>
                             </div>
                             <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest mb-2">Scan at entrance</p>
                             

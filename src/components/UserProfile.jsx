@@ -451,7 +451,12 @@ const UserProfile = ({ user, onUpdateUser, onLogout, onClose }) => {
                                                 <img src={b.posterPath} className="w-full h-full object-cover" alt={b.movieTitle} />
                                             </div>
                                             <div className="flex-1">
-                                                <h4 className="text-2xl font-black text-white uppercase tracking-tighter italic mb-3 group-hover:text-[#f84464] transition-colors">{b.movieTitle}</h4>
+                                                <div className="flex items-center gap-3 mb-3">
+                                                    <h4 className="text-2xl font-black text-white uppercase tracking-tighter italic group-hover:text-[#f84464] transition-colors leading-none">{b.movieTitle}</h4>
+                                                    <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${b.status === 'confirmed' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-orange-500/10 text-orange-500 border border-orange-500/20 animate-pulse'}`}>
+                                                        {b.status === 'confirmed' ? 'Confirmed' : 'Pending'}
+                                                    </span>
+                                                </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
                                                         <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Venue</p>

@@ -19,9 +19,12 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && error.response.status === 401) {
+        // Only auto-logout if it's NOT a login attempt and we get a 401
+        const isLoginRequest = error.config?.url?.includes('/auth/login');
+        
+        if (error.response && error.response.status === 401 && !isLoginRequest) {
             localStorage.removeItem('movie_user');
-            window.location.reload(); // Force refresh to Auth state
+            window.location.reload(); 
         }
         return Promise.reject(error);
     }
