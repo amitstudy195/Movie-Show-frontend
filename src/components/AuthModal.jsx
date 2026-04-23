@@ -89,7 +89,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                 <div className="p-10">
                     <div className="text-center mb-10">
                         <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-[1.5rem] mx-auto flex items-center justify-center mb-4 border border-white/10 shadow-2xl">
-                            <span className="text-2xl">{authType === 'email' ? '👤' : '📱'}</span>
+                            <span className="text-2xl">👤</span>
                         </div>
                         <h2 className="text-3xl font-black text-white uppercase tracking-tighter">
                             {isLogin ? 'Welcome Back' : 'Join the Magic'}
