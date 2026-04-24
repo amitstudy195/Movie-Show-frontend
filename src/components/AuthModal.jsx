@@ -189,7 +189,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                         )}
 
                         <button type="submit" disabled={loading} className="w-full h-16 bg-white text-black font-black rounded-2xl hover:bg-cyan-400 transition-all uppercase text-xs tracking-widest mt-6 shadow-xl shadow-cyan-500/10 flex items-center justify-center gap-3">
-                            {loading ? <div className="w-5 h-5 border-3 border-black/30 border-t-black rounded-full animate-spin"></div> : (isLogin ? 'Execute Sign In' : 'Initialize Account')}
+                            {loading ? <div className="w-5 h-5 border-3 border-black/30 border-t-black rounded-full animate-spin"></div> : (isLogin ? 'Sign In' : 'Sign Up')}
                         </button>
 
                         <div className="mt-8 text-center">
