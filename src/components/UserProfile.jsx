@@ -227,10 +227,6 @@ const UserProfile = ({ user, onUpdateUser, onLogout, onClose }) => {
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
-                            <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span>
-                            <span className="text-[10px] font-black text-white/80 uppercase tracking-widest">{membershipTier} Level</span>
-                        </div>
                         <button onClick={onClose} className="w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white hover:text-black rounded-full transition-all group active:scale-90">
                             <svg className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
@@ -251,16 +247,6 @@ const UserProfile = ({ user, onUpdateUser, onLogout, onClose }) => {
                             className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] transition-all ${activeTab === 'bookings' ? 'bg-[#f84464] text-white' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
                         >
                             <span className="text-lg">🎟️</span> Your Orders
-                        </button>
-                        <button
-                            className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-[11px] font-black text-gray-400/50 uppercase tracking-[0.15em] hover:bg-white/5 transition-all"
-                        >
-                            <span className="text-lg italic opacity-50 text-white">💰</span> QuikPay
-                        </button>
-                        <button
-                            className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-[11px] font-black text-gray-400/50 uppercase tracking-[0.15em] hover:bg-white/5 transition-all"
-                        >
-                            <span className="text-lg italic opacity-50 text-white">🎁</span> Rewards
                         </button>
                         <button onClick={onLogout} className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-[11px] font-black text-red-500 uppercase tracking-[0.15em] hover:bg-red-500/10 transition-all">
                             <span className="text-lg">🚪</span> Sign Out
