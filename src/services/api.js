@@ -50,6 +50,10 @@ export const authService = {
     async submitRating(movieId, rating) {
         const response = await api.post('/auth/rate', { movieId, rating });
         return response.data;
+    },
+    async getAllUsers() {
+        const response = await api.get('/auth');
+        return response.data;
     }
 };
 

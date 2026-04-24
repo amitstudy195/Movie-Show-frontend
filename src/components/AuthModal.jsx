@@ -120,32 +120,34 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                                     value={formData.email}
                                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                                 />
-                                {isLogin && !useEmailOtp && (
+                                {(isLogin && !useEmailOtp) || !isLogin ? (
                                     <div className="space-y-2">
                                         <input 
-                                            type="password" placeholder="PASSWORD" required
+                                            type="password" placeholder="CREATE PASSWORD" required
                                             className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-cyan-500 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/20 transition-all font-bold"
                                             value={formData.password}
                                             onChange={(e) => setFormData({...formData, password: e.target.value})}
                                         />
-                                        <div className="flex justify-between items-center px-2">
-                                            <button 
-                                                type="button"
-                                                onClick={() => setUseEmailOtp(!useEmailOtp)}
-                                                className="text-[8px] font-black text-cyan-500/60 hover:text-cyan-400 uppercase tracking-widest transition-colors"
-                                            >
-                                                {useEmailOtp ? "Use Password" : "Login with OTP"}
-                                            </button>
-                                            <button 
-                                                type="button"
-                                                onClick={() => setIsForgot(true)}
-                                                className="text-[8px] font-black text-red-500/60 hover:text-red-500 uppercase tracking-widest transition-colors"
-                                            >
-                                                Forgot Password?
-                                            </button>
-                                        </div>
+                                        {isLogin && (
+                                            <div className="flex justify-between items-center px-2">
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => setUseEmailOtp(!useEmailOtp)}
+                                                    className="text-[8px] font-black text-cyan-500/60 hover:text-cyan-400 uppercase tracking-widest transition-colors"
+                                                >
+                                                    {useEmailOtp ? "Use Password" : "Login with OTP"}
+                                                </button>
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => setIsForgot(true)}
+                                                    className="text-[8px] font-black text-red-500/60 hover:text-red-500 uppercase tracking-widest transition-colors"
+                                                >
+                                                    Forgot Password?
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                ) : null}
                             </>
                         ) : (
                             <div className="space-y-4">
@@ -187,8 +189,22 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                         )}
 
                         <button type="submit" disabled={loading} className="w-full h-16 bg-white text-black font-black rounded-2xl hover:bg-cyan-400 transition-all uppercase text-xs tracking-widest mt-6 shadow-xl shadow-cyan-500/10 flex items-center justify-center gap-3">
-                            {loading ? <div className="w-5 h-5 border-3 border-black/30 border-t-black rounded-full animate-spin"></div> : (isLogin ? 'Sign In' : 'Sign Up')}
+                            {loading ? <div className="w-5 h-5 border-3 border-black/30 border-t-black rounded-full animate-spin"></div> : (isLogin ? 'Execute Sign In' : 'Initialize Account')}
                         </button>
+
+                        <div className="mt-8 text-center">
+                            <button 
+                                type="button"
+                                onClick={() => { setIsLogin(!isLogin); setError(''); }}
+                                className="text-[10px] font-black text-white/40 hover:text-cyan-400 uppercase tracking-[0.3em] transition-all"
+                            >
+                                {isLogin ? (
+                                    <>New to the platform? <span className="text-cyan-500 border-b border-cyan-500/20 pb-1">Sign Up</span></>
+                                ) : (
+                                    <>Already verified? <span className="text-cyan-500 border-b border-cyan-500/20 pb-1">Sign In</span></>
+                                )}
+                            </button>
+                        </div>
 
                     </form>
                 </div>

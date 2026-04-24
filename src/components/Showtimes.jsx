@@ -40,7 +40,10 @@ const Showtimes = ({ movieId, movieTitle, selectedCity, onSelectShowtime, allThe
     let processed = allTheaters
         .filter(t => t.city?.toLowerCase() === selectedCity?.toLowerCase()) 
         .map(t => {
-            const theaterTimes = currentMovieSchedules.filter(s => s.theaterId?.toString() === t.id?.toString()).map(s => s.time);
+            const tId = (t._id || t.id)?.toString();
+            const theaterTimes = currentMovieSchedules
+                .filter(s => (s.theaterId?._id || s.theaterId)?.toString() === tId)
+                .map(s => s.time);
             
             // If this specific theater has no manual schedules, use our premium fallback set
             const finalTimes = theaterTimes.length > 0 
@@ -92,7 +95,7 @@ const Showtimes = ({ movieId, movieTitle, selectedCity, onSelectShowtime, allThe
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {theatersWithTimes.length > 0 ? (
           theatersWithTimes.map((theater) => (
-            <div key={theater.id} className="bg-[#2a2a2a] border border-white/5 rounded-2xl p-4 hover:border-white/10 transition-all">
+            <div key={theater._id || theater.id} className="bg-[#2a2a2a] border border-white/5 rounded-2xl p-4 hover:border-white/10 transition-all">
               <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                       <span className="text-lg">🎬</span>
@@ -118,7 +121,7 @@ const Showtimes = ({ movieId, movieTitle, selectedCity, onSelectShowtime, allThe
                 {theater.times.map((time, idx) => {
                     const isFillingFast = idx % 3 === 0;
                     return (
-                      <div className="group relative" key={`time-${theater.id || theater.name}-${idx}`}>
+                      <div className="group relative" key={`time-${theater._id || theater.id || theater.name}-${idx}`}>
                           <button 
                               onClick={() => {
                                   const d = days[selectedDay];

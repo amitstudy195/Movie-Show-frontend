@@ -44,33 +44,33 @@ export const cinemaService = {
             const response = await axios.get(`${API_URL}/theaters`, {
                 params: { city: selectedCity }
             });
-            
+
             let theaters = response.data;
 
             // Dynamic Generation Fallback (if backend has no data for this new city yet)
             if (selectedCity && theaters.length === 0) {
                 const dynamicTheaters = [
-                    { 
-                        name: `${selectedCity} PVR`, 
-                        location: "Main Street Mall", 
-                        city: selectedCity, 
-                        formats: ["IMAX", "2D"], 
-                        rows: 8, cols: 12, price: 150, distance: 1.5 
+                    {
+                        name: `${selectedCity} PVR`,
+                        location: "Main Street Mall",
+                        city: selectedCity,
+                        formats: ["IMAX", "2D"],
+                        rows: 8, cols: 12, price: 150, distance: 1.5
                     },
-                    { 
-                        name: `${selectedCity} Inox`, 
-                        location: "Central Garden Plaza", 
-                        city: selectedCity, 
-                        formats: ["4DX", "3D"], 
-                        rows: 10, cols: 15, price: 180, distance: 2.8 
+                    {
+                        name: `${selectedCity} Inox`,
+                        location: "Central Garden Plaza",
+                        city: selectedCity,
+                        formats: ["4DX", "3D"],
+                        rows: 10, cols: 15, price: 180, distance: 2.8
                     }
                 ];
-                
+
                 // Auto-seed the backend with these dynamic theaters for future use
                 for (const t of dynamicTheaters) {
                     await axios.post(`${API_URL}/theaters`, t).catch(console.error);
                 }
-                
+
                 const retryResponse = await axios.get(`${API_URL}/theaters`, { params: { city: selectedCity } });
                 theaters = retryResponse.data;
             }
@@ -84,26 +84,55 @@ export const cinemaService = {
     },
 
     /**
-     * Fetches movie schedules for a specific movie ID or all schedules.
+     * Fetches movie schedules for a specific movie ID or all schedules from the API.
      */
     async fetchSchedules(movieId = null) {
-        await new Promise(r => setTimeout(r, 800));
-        const saved = localStorage.getItem('cinema_schedules');
-        let schedules = saved ? JSON.parse(saved) : INITIAL_SCHEDULES;
-        
-        if (movieId) {
-            return schedules.filter(s => s.movieId.toString() === movieId.toString());
+        try {
+            const response = await axios.get(`${API_URL}/schedules`, {
+                params: { movieId }
+            });
+            return response.data;
+        } catch (err) {
+            console.error('Failed to fetch schedules from API:', err);
+            return INITIAL_SCHEDULES.filter(s => !movieId || s.movieId.toString() === movieId.toString());
         }
-        return schedules;
     },
 
     /**
-     * Synchronizes new data to the "Cinema Database".
+     * Synchronizes new data to the "Cinema Database" in the backend.
      */
     async syncData(theaters, schedules) {
-        await new Promise(r => setTimeout(r, 1000));
-        localStorage.setItem('cinema_theaters', JSON.stringify(theaters));
-        localStorage.setItem('cinema_schedules', JSON.stringify(schedules));
-        return { success: true, timestamp: new Date().toISOString() };
+        try {
+            // Get user token for admin access
+            const user = JSON.parse(localStorage.getItem('movie_user'));
+            const config = {
+                headers: { Authorization: `Bearer ${user?.token}` }
+            };
+
+            const response = await axios.post(`${API_URL}/schedules/sync`, { schedules }, config);
+            return { success: true, data: response.data, timestamp: new Date().toISOString() };
+        } catch (err) {
+            console.error('Failed to sync schedules to API:', err);
+            // Fallback to local storage if API fails
+            localStorage.setItem('cinema_schedules', JSON.stringify(schedules));
+            return { success: false, error: err.message };
+        }
+    },
+
+    /**
+     * Specifically deletes a schedule from the backend.
+     */
+    async deleteSchedule(id) {
+        try {
+            const user = JSON.parse(localStorage.getItem('movie_user'));
+            const config = {
+                headers: { Authorization: `Bearer ${user?.token}` }
+            };
+            await axios.delete(`${API_URL}/schedules/${id}`, config);
+            return true;
+        } catch (err) {
+            console.error('Failed to delete schedule from API:', err);
+            return false;
+        }
     }
 };

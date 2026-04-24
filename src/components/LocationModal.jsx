@@ -9,7 +9,6 @@ const cities = [
     { name: "Chennai", icon: "🌊", popular: true },
     { name: "Kolkata", icon: "🎨", popular: true },
     { name: "Pune", icon: "📚", popular: true },
-    { name: "Pune", icon: "📚", popular: true },
     { name: "Kochi", icon: "🚢" },
     { name: "Jaipur", icon: "🏰" },
     { name: "Lucknow", icon: "🥘" },
