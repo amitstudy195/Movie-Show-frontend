@@ -205,7 +205,22 @@ const UserProfile = ({ user, onUpdateUser, onLogout, onClose }) => {
 
     const handleUpdateProfile = (e) => {
         e.preventDefault();
-        onUpdateUser({ ...profileData, name: `${profileData.firstName} ${profileData.lastName}`.trim() });
+        
+        // 🛡️ SECURITY: Whitelist ONLY personal details for update. 
+        // We explicitly EXCLUDE 'isAdmin' and 'email' (usually protected) to prevent privilege escalation.
+        const updatePayload = {
+            name: `${profileData.firstName} ${profileData.lastName}`.trim(),
+            mobile: profileData.mobile,
+            birthday: profileData.birthday,
+            gender: profileData.gender,
+            pincode: profileData.pincode,
+            city: profileData.city,
+            state: profileData.state,
+            favoriteGenres: profileData.favoriteGenres,
+            preferredLanguages: profileData.preferredLanguages
+        };
+
+        onUpdateUser(updatePayload);
         setIsEditing(false);
     };
 
