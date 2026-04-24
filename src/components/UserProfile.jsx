@@ -172,6 +172,8 @@ const UserProfile = ({ user, onUpdateUser, onLogout, onClose }) => {
         pincode: '400001',
         city: 'Mumbai',
         state: 'Maharashtra',
+        favoriteGenres: user?.favoriteGenres || ['Action', 'Sci-Fi'],
+        preferredLanguages: user?.preferredLanguages || ['English', 'Hindi'],
         ...user
     });
     const [isEditing, setIsEditing] = useState(false);
@@ -336,15 +338,27 @@ const UserProfile = ({ user, onUpdateUser, onLogout, onClose }) => {
                                             </div>
                                             <span className="text-[8px] px-3 py-1 bg-green-500/20 text-green-500 border border-green-500/30 rounded-full font-black uppercase tracking-tighter">Verified</span>
                                         </div>
-                                        <div className="flex items-center justify-between p-6 bg-black/20 rounded-2xl border border-white/5">
-                                            <div className="flex items-center gap-6">
-                                                <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-xl shadow-inner font-black text-white">#</div>
-                                                <div>
-                                                    <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">Mobile Number</p>
-                                                    <p className="text-sm font-bold text-white">{profileData.mobile}</p>
+                                        <div className="flex flex-col gap-3 p-6 bg-black/20 rounded-2xl border border-white/5">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-6">
+                                                    <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-xl shadow-inner font-black text-white">#</div>
+                                                    <div>
+                                                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">Mobile Number</p>
+                                                        {!isEditing ? (
+                                                            <p className="text-sm font-bold text-white">{profileData.mobile}</p>
+                                                        ) : (
+                                                            <input 
+                                                                type="text" 
+                                                                className="bg-transparent border-b border-red-500/50 text-sm font-bold text-white outline-none focus:border-red-500 transition-all uppercase"
+                                                                value={profileData.mobile}
+                                                                onChange={(e) => setProfileData({...profileData, mobile: e.target.value})}
+                                                                autoFocus
+                                                            />
+                                                        )}
+                                                    </div>
                                                 </div>
+                                                {!isEditing && <button type="button" onClick={() => setIsEditing(true)} className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline">Edit</button>}
                                             </div>
-                                            <button type="button" className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline">Edit</button>
                                         </div>
                                     </div>
                                 </section>
@@ -368,18 +382,22 @@ const UserProfile = ({ user, onUpdateUser, onLogout, onClose }) => {
                                             <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">City</label>
                                             <input
                                                 type="text"
-                                                className={`w-full bg-black/40 border border-white/10 rounded-xl p-5 text-sm text-white focus:border-[#f84464] outline-none transition-all font-bold opacity-60 cursor-not-allowed`}
+                                                className={`w-full bg-black/40 border border-white/10 rounded-xl p-5 text-sm text-white focus:border-[#f84464] outline-none transition-all font-bold ${!isEditing && 'opacity-60 cursor-not-allowed'}`}
                                                 value={profileData.city}
-                                                disabled={true}
+                                                onChange={(e) => setProfileData({...profileData, city: e.target.value})}
+                                                disabled={!isEditing}
+                                                placeholder="City"
                                             />
                                         </div>
                                         <div className="space-y-3">
                                             <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">State</label>
                                             <input
                                                 type="text"
-                                                className={`w-full bg-black/40 border border-white/10 rounded-xl p-5 text-sm text-white focus:border-[#f84464] outline-none transition-all font-bold opacity-60 cursor-not-allowed`}
+                                                className={`w-full bg-black/40 border border-white/10 rounded-xl p-5 text-sm text-white focus:border-[#f84464] outline-none transition-all font-bold ${!isEditing && 'opacity-60 cursor-not-allowed'}`}
                                                 value={profileData.state}
-                                                disabled={true}
+                                                onChange={(e) => setProfileData({...profileData, state: e.target.value})}
+                                                disabled={!isEditing}
+                                                placeholder="State"
                                             />
                                         </div>
                                     </div>
@@ -392,22 +410,47 @@ const UserProfile = ({ user, onUpdateUser, onLogout, onClose }) => {
                                         <div>
                                             <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6 ml-2">Favorite Genres</p>
                                             <div className="flex flex-wrap gap-3">
-                                                {['Action', 'Comedy', 'Horror', 'Sci-Fi', 'Drama', 'Thriller'].map(genre => (
-                                                    <button key={genre} type="button" className="px-5 py-3 rounded-full border border-white/10 bg-black/40 text-[9px] font-black text-white uppercase tracking-widest hover:border-[#f84464] hover:text-[#f84464] transition-all">
-                                                        {genre}
-                                                    </button>
-                                                ))}
-                                                <button type="button" className="px-5 py-3 rounded-full border border-dashed border-white/20 text-[9px] font-black text-gray-600 uppercase tracking-widest hover:text-white transition-all">+ Add Genre</button>
+                                                {['Action', 'Comedy', 'Horror', 'Sci-Fi', 'Drama', 'Thriller', 'Romance', 'Fantasy'].map(genre => {
+                                                    const isSelected = profileData.favoriteGenres.includes(genre);
+                                                    return (
+                                                        <button 
+                                                            key={genre} 
+                                                            type="button" 
+                                                            onClick={() => {
+                                                                const newGenres = isSelected 
+                                                                    ? profileData.favoriteGenres.filter(g => g !== genre)
+                                                                    : [...profileData.favoriteGenres, genre];
+                                                                setProfileData({...profileData, favoriteGenres: newGenres});
+                                                            }}
+                                                            className={`px-5 py-3 rounded-full border text-[9px] font-black uppercase tracking-widest transition-all ${isSelected ? 'bg-[#f84464] border-[#f84464] text-white' : 'border-white/10 bg-black/40 text-white hover:border-[#f84464]/50'}`}
+                                                        >
+                                                            {genre}
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                         <div>
                                             <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6 ml-2">Preferred Languages</p>
                                             <div className="flex flex-wrap gap-3">
-                                                {['Hindi', 'English', 'Tamil', 'Telugu'].map(lang => (
-                                                    <button key={lang} type="button" className="px-5 py-3 rounded-full border border-[#f84464]/40 bg-[#f84464]/10 text-[9px] font-black text-[#f84464] uppercase tracking-widest">
-                                                        {lang}
-                                                    </button>
-                                                ))}
+                                                {['Hindi', 'English', 'Tamil', 'Telugu', 'Kannada', 'Malayalam'].map(lang => {
+                                                    const isSelected = profileData.preferredLanguages.includes(lang);
+                                                    return (
+                                                        <button 
+                                                            key={lang} 
+                                                            type="button" 
+                                                            onClick={() => {
+                                                                const newLangs = isSelected 
+                                                                    ? profileData.preferredLanguages.filter(l => l !== lang)
+                                                                    : [...profileData.preferredLanguages, lang];
+                                                                setProfileData({...profileData, preferredLanguages: newLangs});
+                                                            }}
+                                                            className={`px-5 py-3 rounded-full border text-[9px] font-black uppercase tracking-widest transition-all ${isSelected ? 'bg-[#f84464] border-[#f84464] text-white' : 'border-white/10 bg-black/40 text-white hover:border-[#f84464]/50'}`}
+                                                        >
+                                                            {lang}
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     </div>
