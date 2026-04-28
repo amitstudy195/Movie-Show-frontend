@@ -271,8 +271,8 @@ const MovieDetailsModal = ({
                                         src={trailerUrl}
                                         className="absolute inset-0 w-full h-full"
                                         title="Movie Trailer"
-                                        frameBorder="1"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure"
                                         allowFullScreen
                                     ></iframe>
                                 </div>
