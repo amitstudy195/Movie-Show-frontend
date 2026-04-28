@@ -52,6 +52,7 @@ function App() {
   })
   const [isAuthOpen, setIsAuthOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [profileTab, setProfileTab] = useState('profile')
   const [bookingMovie, setBookingMovie] = useState(null)
   
   // Engagement State
@@ -351,11 +352,12 @@ function App() {
       } />
       
       <Route path="/" element={
-        <div className="min-h-screen bg-black">
+        <div className="min-h-screen bg-[#F5F5FA]">
           <Header 
             user={user}
             onShowLogin={() => setIsAuthOpen(true)}
-            onShowProfile={() => setIsProfileOpen(true)}
+            onShowProfile={() => { setProfileTab('profile'); setIsProfileOpen(true); }}
+            onShowBookings={() => { setProfileTab('bookings'); setIsProfileOpen(true); }}
             onLogout={handleLogout}
             onShowAdmin={() => navigate('/admin')}
             onToggleNotifications={() => setShowNotifications(!showNotifications)}
@@ -472,6 +474,7 @@ function App() {
                 onUpdateUser={handleUpdateUser}
                 onLogout={handleLogout}
                 onClose={() => setIsProfileOpen(false)} 
+                initialTab={profileTab}
             />
           )}
 

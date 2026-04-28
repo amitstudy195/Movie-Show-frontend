@@ -1,10 +1,10 @@
 /* Custom animations for the enhanced carousel */
 @keyframes glow {
     0%, 100% {
-        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        box-shadow: 0 0 20px rgba(248, 68, 100, 0.1);
     }
     50% {
-        box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        box-shadow: 0 0 30px rgba(248, 68, 100, 0.2);
     }
 }
 
@@ -72,7 +72,7 @@
 
 /* Enhanced hover effects */
 .movie-card-btn:hover .movie-poster {
-    filter: brightness(1.1) contrast(1.05);
+    filter: brightness(1.05) contrast(1.02);
 }
 
 .movie-card-btn:hover {
@@ -94,11 +94,11 @@
     animation: slideIn 0.8s ease-out;
 }
 
-/* Select dropdown styling */
+/* Select dropdown styling - BRIGHT HORIZON EDITION */
 select option {
-    background-color: #1f2937;
-    color: white;
-    padding: 8px;
+    background-color: #ffffff;
+    color: #121212;
+    padding: 12px;
 }
 
 /* Line clamp utility */
@@ -126,10 +126,10 @@ select option {
 /* Custom focus styles */
 input:focus, select:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 3px rgba(248, 68, 100, 0.1);
 }
 
-/* Loading animation */
+/* Loading animation - Light Mode Calibrated */
 @keyframes shimmer {
     0% {
         background-position: -200px 0;
@@ -140,16 +140,16 @@ input:focus, select:focus {
 }
 
 .loading-shimmer {
-    background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+    background: linear-gradient(90deg, #F5F5FA 25%, #EEEEEE 50%, #F5F5FA 75%);
     background-size: 200px 100%;
     animation: shimmer 1.5s infinite;
 }
 
-/* Glassmorphism effect */
+/* Glassmorphism effect - Light Mode */
 .glass {
     backdrop-filter: blur(16px) saturate(180%);
-    background-color: rgba(17, 25, 40, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.125);
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 /* Gradient text animation */

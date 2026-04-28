@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api, { authService } from '../services/api';
-import { auth } from '../firebase';
+import { auth, googleProvider } from '../firebase';
+import { signInWithPopup } from 'firebase/auth';
 
 const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
     const [isLogin, setIsLogin] = useState(true);
@@ -13,6 +14,45 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
     const [useEmailOtp, setUseEmailOtp] = useState(false);
     const [otp, setOtp] = useState('');
     const [resendTimer, setResendTimer] = useState(0);
+
+    const handleGoogleLogin = async () => {
+        setError('');
+        setLoading(true);
+        try {
+            const result = await signInWithPopup(auth, googleProvider);
+            const user = result.user;
+            
+            // Sync with our backend to get/create local user & JWT
+            const response = await api.post('/auth/google-login', {
+                name: user.displayName,
+                email: user.email,
+                photo: user.photoURL,
+                uid: user.uid
+            });
+
+            const userData = response.data;
+            localStorage.setItem('movie_user', JSON.stringify(userData));
+            onLoginSuccess(userData);
+            onClose();
+        } catch (err) {
+            console.error("🕵️ Auth Trace:", err);
+            
+            let message = "Google Authentication failed.";
+            if (err.code === 'auth/operation-not-allowed') {
+                message = "ACTION REQUIRED: Please enable 'Google' as a Sign-In Provider in your Firebase Console (Authentication > Sign-in method).";
+            } else if (err.code === 'auth/popup-blocked') {
+                message = "Handshake blocked: Please allow popups for this cinematic experience.";
+            } else if (err.code === 'auth/popup-closed-by-user') {
+                message = "The vault was closed before identity could be verified.";
+            } else {
+                message = err.response?.data?.message || "Internal identity sync failure. Please check terminal.";
+            }
+            
+            setError(message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         let interval;
@@ -83,22 +123,22 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-zinc-950 border border-white/5 rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in duration-500 relative">
+        <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-xl flex items-center justify-center p-4">
+            <div className="w-full max-w-md glass-effect rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in duration-500 relative bg-white/95">
                 
                 <div className="p-10">
                     <div className="text-center mb-10">
-                        <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-[1.5rem] mx-auto flex items-center justify-center mb-4 border border-white/10 shadow-2xl">
-                            <span className="text-2xl">👤</span>
+                        <div className="w-16 h-16 bg-gradient-to-br from-[#F84464] to-[#FF6B81] rounded-[1.5rem] mx-auto flex items-center justify-center mb-4 shadow-lg shadow-[#F84464]/20 border border-white/20">
+                            <span className="text-2xl text-white">👤</span>
                         </div>
-                        <h2 className="text-3xl font-black text-white uppercase tracking-tighter">
+                        <h2 className="text-3xl font-black text-[#121212] uppercase tracking-tighter italic">
                             {isLogin ? 'Welcome Back' : 'Join the Magic'}
                         </h2>
                         
                     </div>
 
                     {error && (
-                        <div className={`bg-${error.includes('SUCCESS') ? 'emerald' : 'red'}-500/10 border border-${error.includes('SUCCESS') ? 'emerald' : 'red'}-500/20 text-${error.includes('SUCCESS') ? 'emerald' : 'red'}-500 text-[10px] font-black uppercase tracking-widest p-4 rounded-2xl mb-6 text-center animate-pulse`}>
+                        <div className={`bg-${error.includes('SUCCESS') ? 'emerald' : 'red'}-500/10 border border-${error.includes('SUCCESS') ? 'emerald' : 'red'}-500/20 text-${error.includes('SUCCESS') ? 'emerald' : 'red'}-600 text-[10px] font-black uppercase tracking-widest p-4 rounded-2xl mb-6 text-center animate-pulse`}>
                             {error}
                         </div>
                     )}
@@ -109,14 +149,14 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                                 {!isLogin && (
                                     <input 
                                         type="text" placeholder="FULL NAME" required
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-cyan-500 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/20 transition-all font-bold uppercase"
+                                        className="w-full bg-[#F5F5FA] border border-black/5 rounded-2xl p-5 text-sm text-[#121212] placeholder:text-[#666666] outline-none focus:border-[#F84464] focus:ring-2 focus:ring-[#F84464]/10 transition-all font-bold uppercase"
                                         value={formData.name}
                                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                                     />
                                 )}
                                 <input 
                                     type="email" placeholder="EMAIL ADDRESS" required
-                                    className="w-full bg-black/5 text-white border border-white/10 rounded-2xl p-5 text-sm outline-none focus:border-cyan-500 transition-all font-bold"
+                                    className="w-full bg-[#F5F5FA] border border-black/5 rounded-2xl p-5 text-sm text-[#121212] placeholder:text-[#666666] outline-none focus:border-[#F84464] focus:ring-2 focus:ring-[#F84464]/10 transition-all font-bold"
                                     value={formData.email}
                                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                                 />
@@ -124,7 +164,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                                     <div className="space-y-2">
                                         <input 
                                             type="password" placeholder="CREATE PASSWORD" required
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-cyan-500 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/20 transition-all font-bold"
+                                            className="w-full bg-[#F5F5FA] border border-black/5 rounded-2xl p-5 text-sm text-[#121212] placeholder:text-[#666666] outline-none focus:border-[#F84464] focus:ring-2 focus:ring-[#F84464]/10 transition-all font-bold"
                                             value={formData.password}
                                             onChange={(e) => setFormData({...formData, password: e.target.value})}
                                         />
@@ -133,14 +173,14 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                                                 <button 
                                                     type="button"
                                                     onClick={() => setUseEmailOtp(!useEmailOtp)}
-                                                    className="text-[8px] font-black text-cyan-500/60 hover:text-cyan-400 uppercase tracking-widest transition-colors"
+                                                    className="text-[8px] font-black text-[#F84464] hover:text-[#121212] uppercase tracking-widest transition-colors"
                                                 >
                                                     {useEmailOtp ? "Use Password" : "Login with OTP"}
                                                 </button>
                                                 <button 
                                                     type="button"
                                                     onClick={() => setIsForgot(true)}
-                                                    className="text-[8px] font-black text-red-500/60 hover:text-red-500 uppercase tracking-widest transition-colors"
+                                                    className="text-[8px] font-black text-[#666666] hover:text-[#121212] uppercase tracking-widest transition-colors"
                                                 >
                                                     Forgot Password?
                                                 </button>
@@ -152,56 +192,76 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                         ) : (
                             <div className="space-y-4">
                                 <div className="text-center">
-                                    <p className="text-[8px] text-cyan-500 font-black uppercase tracking-widest mb-4">Enter OTP sent to {formData.email}</p>
+                                    <p className="text-[8px] text-[#F84464] font-black uppercase tracking-widest mb-4">Enter OTP sent to {formData.email}</p>
                                     <input 
                                         type="text" placeholder="0 0 0 0 0 0" required autoFocus
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-2xl text-center text-white placeholder:text-zinc-700 outline-none focus:border-cyan-500 focus:bg-white/10 focus:ring-4 focus:ring-cyan-500/10 transition-all font-black tracking-[0.5em]"
+                                        className="w-full bg-[#F5F5FA] border border-black/5 rounded-2xl p-6 text-2xl text-center text-[#121212] placeholder:text-zinc-300 outline-none focus:border-[#F84464] focus:ring-4 focus:ring-[#F84464]/5 transition-all font-black tracking-[0.5em]"
                                         value={otp}
                                         onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                     />
                                 </div>
                                 <div className="flex flex-col gap-3">
-                                    <button type="button" onClick={handleResend} disabled={resendTimer > 0} className={`w-full text-[8px] font-black uppercase tracking-[0.2em] transition-all ${resendTimer > 0 ? 'text-gray-700' : 'text-cyan-500 hover:text-white'}`}>
+                                    <button type="button" onClick={handleResend} disabled={resendTimer > 0} className={`w-full text-[8px] font-black uppercase tracking-[0.2em] transition-all ${resendTimer > 0 ? 'text-gray-300' : 'text-[#F84464] hover:text-[#121212]'}`}>
                                         {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend OTP"}
                                     </button>
-                                    <button type="button" onClick={() => setStep('input')} className="w-full text-[8px] font-black text-gray-500 hover:text-white uppercase tracking-widest transition-colors">Change Email</button>
+                                    <button type="button" onClick={() => setStep('input')} className="w-full text-[8px] font-black text-gray-500 hover:text-[#121212] uppercase tracking-widest transition-colors">Change Email</button>
                                 </div>
                             </div>
                         )}
 
                         {isForgot && (
-                            <div className="absolute inset-x-0 bottom-0 h-[70%] bg-zinc-950 p-10 z-20 flex flex-col justify-center animate-in slide-in-from-bottom-full duration-500 border-t border-white/10 rounded-t-[3rem]">
+                            <div className="absolute inset-x-0 bottom-0 h-[70%] bg-white p-10 z-20 flex flex-col justify-center animate-in slide-in-from-bottom-full duration-500 border-t border-black/5 rounded-t-[3rem] shadow-2xl">
                                 <div className="text-center mb-8">
-                                    <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Identity Recovery</h3>
-                                    <p className="text-[8px] text-gray-500 font-black uppercase tracking-widest mt-2">Enter your email to receive recovery instructions.</p>
+                                    <h3 className="text-2xl font-black text-[#121212] uppercase italic tracking-tighter">Identity Recovery</h3>
+                                    <p className="text-[8px] text-[#666666] font-black uppercase tracking-widest mt-2">Enter your email to receive recovery instructions.</p>
                                 </div>
                                 <div className="space-y-4">
                                     <input 
                                         type="email" placeholder="ASSOCIATED EMAIL" required
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-red-500 transition-all font-bold uppercase"
+                                        className="w-full bg-[#F5F5FA] border border-black/5 rounded-2xl p-5 text-sm text-[#121212] placeholder:text-[#666666] outline-none focus:border-[#F84464] transition-all font-bold uppercase"
                                         value={formData.email}
                                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                                     />
-                                    <button onClick={handleSubmit} className="w-full h-14 bg-red-600 text-white font-black rounded-2xl hover:bg-red-500 transition-all uppercase text-[10px] tracking-widest">Dispatch Link</button>
-                                    <button onClick={() => setIsForgot(false)} className="w-full text-[8px] font-black text-gray-500 hover:text-white uppercase tracking-widest transition-colors mt-4">Back to Protocols</button>
+                                    <button onClick={handleSubmit} className="w-full btn-hero h-14 rounded-2xl">Dispatch Link</button>
+                                    <button onClick={() => setIsForgot(false)} className="w-full text-[8px] font-black text-[#666666] hover:text-[#121212] uppercase tracking-widest transition-colors mt-4">Back to Protocols</button>
                                 </div>
                             </div>
                         )}
 
-                        <button type="submit" disabled={loading} className="w-full h-16 bg-white text-black font-black rounded-2xl hover:bg-cyan-400 transition-all uppercase text-xs tracking-widest mt-6 shadow-xl shadow-cyan-500/10 flex items-center justify-center gap-3">
-                            {loading ? <div className="w-5 h-5 border-3 border-black/30 border-t-black rounded-full animate-spin"></div> : (isLogin ? 'Sign In' : 'Sign Up')}
+                        <button type="submit" disabled={loading} className="w-full h-16 btn-hero rounded-2xl mt-6 flex items-center justify-center gap-3">
+                            {loading ? <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div> : (isLogin ? 'Sign In' : 'Sign Up')}
+                        </button>
+
+                        <div className="relative my-8">
+                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-black/5"></div></div>
+                            <div className="relative flex justify-center text-[8px] font-black uppercase tracking-widest text-[#666666] bg-white px-4 italic">Social Authentication</div>
+                        </div>
+
+                        <button 
+                            type="button"
+                            onClick={handleGoogleLogin}
+                            disabled={loading}
+                            className="w-full h-14 bg-black/5 border border-black/10 rounded-2xl flex items-center justify-center gap-3 hover:bg-black/10 transition-all group"
+                        >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.83z" />
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.83c.87-2.6 3.3-4.52 6.16-4.52z" />
+                            </svg>
+                            <span className="text-[10px] font-bold text-[#121212] uppercase tracking-widest group-hover:text-[#F84464] transition-colors">Continue with Google</span>
                         </button>
 
                         <div className="mt-8 text-center">
                             <button 
                                 type="button"
                                 onClick={() => { setIsLogin(!isLogin); setError(''); }}
-                                className="text-[10px] font-black text-white/40 hover:text-cyan-400 uppercase tracking-[0.3em] transition-all"
+                                className="text-[10px] font-black text-black/50 hover:text-[#F84464] uppercase tracking-[0.3em] transition-all"
                             >
                                 {isLogin ? (
-                                    <>New to the platform? <span className="text-cyan-500 border-b border-cyan-500/20 pb-1">Sign Up</span></>
+                                    <>New to the platform? <span className="text-[#F84464] border-b border-[#F84464]/20 pb-1">Sign Up</span></>
                                 ) : (
-                                    <>Already verified? <span className="text-cyan-500 border-b border-cyan-500/20 pb-1">Sign In</span></>
+                                    <>Already verified? <span className="text-[#F84464] border-b border-[#F84464]/20 pb-1">Sign In</span></>
                                 )}
                             </button>
                         </div>
@@ -209,7 +269,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     </form>
                 </div>
 
-                <button onClick={onClose} className="absolute top-8 right-8 text-gray-700 hover:text-white transition-colors">
+                <button onClick={onClose} className="absolute top-8 right-8 text-[#666666] hover:text-[#121212] transition-colors">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>

@@ -27,27 +27,27 @@ const BookingFlow = ({ movie, user, allTheaters, allSchedules, selectedCity, onC
     };
 
     return (
-        <div className="fixed inset-0 z-[200] bg-[#1a1a1a] flex flex-col animate-in slide-in-from-right duration-500">
+        <div className="fixed inset-0 z-[200] bg-[#F5F5FA] flex flex-col animate-in slide-in-from-right duration-500">
             {/* Header Area (BMS Style) */}
-            <header className="px-8 py-6 bg-[#212121] border-b border-white/5 flex items-center justify-between">
+            <header className="px-8 py-6 bg-white border-b border-black/5 flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-6">
-                    <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+                    <button onClick={onClose} className="text-[#666666] hover:text-[#121212] transition-colors">
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
                     </button>
                     <div>
-                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter leading-none">{movie.title}</h2>
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
+                        <h2 className="text-2xl font-black text-[#121212] uppercase italic tracking-tighter leading-none">{movie.title}</h2>
+                        <p className="text-[10px] font-bold text-[#666666] uppercase tracking-widest mt-1">
                             {movie.genres?.map(g => g.name).join(' | ')} • {movie.runtime}m
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
-                        <span className={`w-2 h-2 rounded-full ${step >= 1 ? 'bg-[#f84464]' : 'bg-gray-600'}`}></span>
-                        <span className={`w-2 h-2 rounded-full ${step >= 2 ? 'bg-[#f84464]' : 'bg-gray-600'}`}></span>
-                        <span className={`w-2 h-2 rounded-full ${step >= 3 ? 'bg-[#f84464]' : 'bg-gray-600'}`}></span>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-black/5 rounded-full border border-black/5">
+                        <span className={`w-2 h-2 rounded-full ${step >= 1 ? 'bg-[#f84464]' : 'bg-gray-300'}`}></span>
+                        <span className={`w-2 h-2 rounded-full ${step >= 2 ? 'bg-[#f84464]' : 'bg-gray-300'}`}></span>
+                        <span className={`w-2 h-2 rounded-full ${step >= 3 ? 'bg-[#f84464]' : 'bg-gray-300'}`}></span>
                     </div>
-                    <button onClick={onClose} className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-red-600 text-white rounded-full transition-all">
+                    <button onClick={onClose} className="w-10 h-10 flex items-center justify-center bg-black/5 hover:bg-[#F84464] text-[#121212] hover:text-white rounded-full transition-all">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>

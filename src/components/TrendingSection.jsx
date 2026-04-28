@@ -16,38 +16,38 @@ const TrendingSection = ({ movies = [], genres = {}, onMovieClick, likedMovies =
     }
   }
 
-  const FALLBACK_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDI4MCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyODAiIGhlaWdodD0iMzAwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjE0MCIgeT0iMTUwIiBmaWxsPSIjNjY2IiB0ZXh0LWFuY2hvcj0ibwlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+Cjwvc3ZnPg=='
+  const FALLBACK_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDI4MCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyODAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZWVlIi8+Cjx0ZXh0IHg9IjE0MCIgeT0iMTUwIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+Cjwvc3ZnPg=='
 
   return (
-    <section className="py-8 px-6 bg-gradient-to-b from-gray-900 to-black">
-      <div className="flex items-center justify-between mb-8">
+    <section className="py-12 px-6 bg-[#F5F5FA]">
+      <div className="flex items-center justify-between mb-10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center shadow-lg shadow-orange-500/20">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#F84464] to-[#FF6B81] rounded-2xl flex items-center justify-center shadow-lg shadow-[#F84464]/20 -rotate-3 transition-transform hover:rotate-0 duration-300">
             <span className="text-lg">🔥</span>
           </div>
-          <h2 className="text-3xl font-black bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent italic tracking-tighter">
+          <h2 className="text-2xl font-black text-[#121212] uppercase italic tracking-tighter">
             Trending Now
           </h2>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           <button
             onClick={() => scrollCarousel('prev')}
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 p-3 rounded-full text-white transition-all duration-300 transform hover:scale-110 shadow-lg shadow-blue-500/25 border border-blue-400/30"
+            className="w-11 h-11 bg-white border border-black/5 rounded-2xl flex items-center justify-center text-[#121212] hover:bg-[#121212] hover:text-white transition-all shadow-xl"
           >
-            ◀️
+            ←
           </button>
           <button
             onClick={() => scrollCarousel('next')}
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 p-3 rounded-full text-white transition-all duration-300 transform hover:scale-110 shadow-lg shadow-blue-500/25 border border-blue-400/30"
+            className="w-11 h-11 bg-white border border-black/5 rounded-2xl flex items-center justify-center text-[#121212] hover:bg-[#121212] hover:text-white transition-all shadow-xl"
           >
-            ▶️
+            →
           </button>
         </div>
       </div>
 
       <div
         ref={carouselRef}
-        className="flex gap-6 overflow-x-auto scrollbar-hide pb-6"
+        className="flex gap-8 overflow-x-auto scrollbar-hide pb-10 px-2"
       >
         {movies.slice(0, 20).map((movie, index) => {
           const posterPath = movie.poster_path
@@ -58,39 +58,43 @@ const TrendingSection = ({ movies = [], genres = {}, onMovieClick, likedMovies =
             .slice(0, 2)
             .map(id => genres[id])
             .filter(Boolean)
-            .join(', ')
+            .join(' • ')
 
           return (
             <div
-              key={movie.id}
-              className="flex-shrink-0 w-48 cursor-pointer transform transition-all duration-500 hover:scale-[1.05] hover:-translate-y-2 group"
+              key={`${movie.id}-${index}`}
+              className="flex-shrink-0 w-52 cursor-pointer poster-hover group"
               onClick={() => onMovieClick(movie.id)}
             >
-              <div className="relative mb-3 overflow-hidden rounded-2xl shadow-2xl border border-white/5 transition-all duration-300">
+              <div className="relative mb-4 overflow-hidden rounded-3xl shadow-2xl border border-black/5 bg-white">
                 <img
                   src={posterPath}
                   alt={movie.title}
-                  className="w-full h-72 object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="w-full h-80 object-cover transition-transform duration-700 group-hover:scale-110"
                   onError={(e) => {
                     e.target.src = FALLBACK_IMAGE
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
-                <div className="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-[10px] font-black px-3 py-1 rounded-full shadow-lg border-2 border-yellow-300">
+                {/* Lighter Gradient Overlay for Light Mode */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#ffffff]/40 via-transparent to-transparent opacity-80 group-hover:opacity-40 transition-opacity"></div>
+                
+                <div className="absolute top-4 left-4 bg-[#F84464] text-white text-[10px] font-black px-3 py-1 rounded-xl shadow-lg border border-white/10 italic z-10">
                   #{index + 1}
                 </div>
-                <div className="absolute top-3 right-3 bg-gradient-to-r from-green-400 to-blue-500 text-white text-[9px] font-black px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
-                   {movie.vote_average.toFixed(1)}
+
+                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md border border-black/5 rounded-xl px-2.5 py-1 flex items-center gap-1 z-10 shadow-sm">
+                   <span className="text-[#121212] text-[10px] font-black">{movie.vote_average.toFixed(1)}</span>
                 </div>
+
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
                     onToggleLike(movie.id);
                   }}
-                  className={`absolute bottom-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 group-hover:opacity-100 ${
+                  className={`absolute bottom-4 left-4 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 shadow-xl z-10 ${
                     likedMovies.includes(movie.id.toString()) || likedMovies.includes(movie.id)
-                      ? 'bg-red-500 text-white scale-110 opacity-100' 
-                      : 'bg-black/60 text-white hover:bg-white hover:text-red-500'
+                      ? 'bg-[#F84464] text-white scale-110 opacity-100' 
+                      : 'bg-white/90 text-[#121212] hover:bg-[#F84464] hover:text-white backdrop-blur-md'
                   }`}
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -98,11 +102,12 @@ const TrendingSection = ({ movies = [], genres = {}, onMovieClick, likedMovies =
                   </svg>
                 </button>
               </div>
-              <div className="px-1 space-y-1">
-                <h3 className="text-white font-bold text-sm truncate group-hover:text-yellow-400 transition-colors uppercase tracking-tight italic">{movie.title}</h3>
-                <div className="flex items-center justify-between text-[10px]">
-                  <span className="text-gray-500 font-bold">{new Date(movie.release_date).getFullYear()}</span>
-                  <span className="text-cyan-500/80 font-black tracking-widest uppercase">{movieGenres || 'Action'}</span>
+              <div className="px-1">
+                <h3 className="text-[#121212] font-black text-[11px] truncate group-hover:text-[#F84464] transition-colors uppercase tracking-widest leading-none mb-2 italic">{movie.title}</h3>
+                <div className="flex items-center gap-3">
+                   <span className="text-[#F84464] text-[8px] font-black uppercase tracking-widest">{movieGenres || 'Action'}</span>
+                   <span className="text-black/10 text-[8px] font-bold">/</span>
+                   <span className="text-[#666666] text-[8px] font-bold">{new Date(movie.release_date).getFullYear()}</span>
                 </div>
               </div>
             </div>

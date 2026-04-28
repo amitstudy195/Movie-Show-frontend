@@ -50,7 +50,7 @@ const LocationModal = ({ currentCity, onSelect, onClose }) => {
 
     const detectLocation = () => {
         if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser");
+            alert("Security: Geolocation protocols not supported by this terminal.");
             return;
         }
 
@@ -66,7 +66,7 @@ const LocationModal = ({ currentCity, onSelect, onClose }) => {
                 onClose();
             } catch (error) {
                 console.error("Location detection failed:", error);
-                alert("Could not detect your exact city. Defaulting to Mumbai.");
+                alert("Protocol Warning: Could not resolve exact coordinates. Fallback to Primary Hub (Mumbai).");
                 onSelect("Mumbai");
                 onClose();
             } finally {
@@ -74,7 +74,7 @@ const LocationModal = ({ currentCity, onSelect, onClose }) => {
             }
         }, (error) => {
             console.error("Geolocation error:", error);
-            alert("Permission denied or location unavailable.");
+            alert("Security Error: Access denied to terminal coordinates.");
             setIsDetecting(false);
         });
     };
@@ -84,26 +84,26 @@ const LocationModal = ({ currentCity, onSelect, onClose }) => {
     );
 
     return (
-        <div className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
-            <div className="w-full max-w-2xl bg-[#0a0a0a] border border-white/5 rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-[300] bg-[#1A1A1A]/95 backdrop-blur-3xl flex items-center justify-center p-4 animate-in fade-in zoom-in duration-500">
+            <div className="w-full max-w-2xl bg-[#1A1A1A] border border-white/5 rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] glass-effect">
                 {/* Header */}
                 <div className="p-10 border-b border-white/5 bg-white/[0.01]">
                     <div className="flex justify-between items-center mb-8">
                         <div>
-                            <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic">Where are you?</h2>
-                            <p className="text-gray-500 text-[8px] font-bold uppercase tracking-[0.4em] mt-1">Discover cinematic experiences near you</p>
+                            <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic">WHERE ARE YOU?</h2>
+                            <p className="text-[#999999] text-[8px] font-black uppercase tracking-[0.4em] mt-1 italic">Identify your geospatial hub to discover cinematography</p>
                         </div>
-                        <button onClick={onClose} className="w-12 h-12 flex items-center justify-center bg-white/5 hover:bg-red-600 text-white rounded-full transition-all">
+                        <button onClick={onClose} className="w-12 h-12 flex items-center justify-center bg-white/5 hover:bg-[#F84464] text-white rounded-full transition-all duration-500 hover:rotate-90">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
                     
                     <div className="relative group">
-                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xl group-focus-within:scale-110 transition-transform">🔍</span>
+                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xl group-focus-within:scale-125 transition-transform">🔍</span>
                         <input 
                             type="text" 
-                            placeholder="Search for your city (e.g. Patna, Mumbai, Delhi)..."
-                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 pl-14 text-sm text-white outline-none focus:border-cyan-500 transition-all font-bold placeholder:text-gray-600"
+                            placeholder="SEARCH FOR YOUR SECTOR (E.G. PATNA, MUMBAI, DELHI)..."
+                            className="w-full bg-[#212121] border border-white/5 rounded-2xl p-5 pl-14 text-[10px] text-white outline-none focus:border-[#F84464] transition-all font-black tracking-widest placeholder:text-[#999999]/30 uppercase italic"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -112,35 +112,40 @@ const LocationModal = ({ currentCity, onSelect, onClose }) => {
 
                 {/* Cities Grid */}
                 <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
-                    <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em]">Popular Hubs</h3>
+                    <div className="flex items-center justify-between mb-10">
+                        <h3 className="text-[10px] font-black text-[#999999] uppercase tracking-[0.3em] italic leading-none">PRIMARY TARGET HUBS</h3>
                         <button 
                             onClick={detectLocation}
                             disabled={isDetecting}
-                            className="flex items-center gap-2 text-[10px] font-black text-cyan-500 hover:text-white uppercase tracking-widest transition-all disabled:opacity-50"
+                            className="flex items-center gap-3 text-[9px] font-black text-[#F84464] hover:text-white uppercase tracking-widest transition-all disabled:opacity-50 italic group"
                         >
                             {isDetecting ? (
-                                <div className="w-3 h-3 border-2 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
+                                <div className="w-3 h-3 border-2 border-[#F84464]/30 border-t-[#F84464] rounded-full animate-spin"></div>
                             ) : (
-                                <span className="text-base">📍</span>
+                                <span className="text-base group-hover:animate-pulse">📍</span>
                             )}
-                            {isDetecting ? "Locating..." : "Auto detect my city"}
+                            {isDetecting ? "CALIBRATING..." : "IDENTIFY CURRENT SECTOR"}
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                         {filteredCities.map(city => (
                             <button
                                 key={city.name}
                                 onClick={() => { onSelect(city.name); onClose(); }}
-                                className={`flex flex-col items-center gap-4 p-6 rounded-[2rem] border transition-all duration-300 group ${
+                                className={`flex flex-col items-center gap-6 p-8 rounded-[2.5rem] border transition-all duration-500 group relative overflow-hidden ${
                                     currentCity === city.name 
-                                    ? 'bg-gradient-to-br from-cyan-500 to-blue-600 border-white/20 text-white shadow-2xl shadow-cyan-500/20' 
-                                    : 'bg-white/5 border-white/5 text-gray-500 hover:bg-white hover:text-black hover:scale-[1.05]'
+                                    ? 'bg-[#F84464] border-[#F84464] text-white shadow-[0_0_30px_rgba(248,68,100,0.3)]' 
+                                    : 'bg-[#212121] border-white/5 text-[#999999] hover:bg-white hover:text-black hover:scale-[1.08] hover:-rotate-2'
                                 }`}
                             >
-                                <span className="text-3xl filter grayscale group-hover:grayscale-0 transition-all">{city.icon}</span>
-                                <span className="text-[9px] font-black uppercase tracking-widest">{city.name}</span>
+                                <span className={`text-4xl filter group-hover:grayscale-0 transition-all duration-700 ${currentCity === city.name ? 'grayscale-0' : 'grayscale'}`}>{city.icon}</span>
+                                <span className="text-[9px] font-black uppercase tracking-widest italic">{city.name}</span>
+                                {currentCity === city.name && (
+                                    <div className="absolute top-0 right-0 p-3">
+                                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
+                                    </div>
+                                )}
                             </button>
                         ))}
                     </div>

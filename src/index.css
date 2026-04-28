@@ -1,18 +1,39 @@
 /* @tailwind base;
-@tailwind components; */
-/* @tailwind utilities; */
+@tailwind components;
+@tailwind utilities; */
+
 @import "tailwindcss";
+
+/* 🎭 HERO DESIGN SYSTEM tokens - BRIGHT HORIZON EDITION */
+:root {
+  --hero-pink: #F84464;
+  --hero-pink-glow: rgba(248, 68, 100, 0.2);
+  --bg-hero: #F5F5FA; /* Pristine Off-White */
+  --surface-hero: #FFFFFF; /* Pure White Surface */
+  --text-primary: #121212; /* Deep Charcoal Text */
+  --text-secondary: #666666; /* Muted Slate detail */
+  --glass-hero: rgba(255, 255, 255, 0.8);
+  --border-hero: rgba(0, 0, 0, 0.08);
+  --primary-glow: rgba(248, 68, 100, 0.15);
+}
+
+/* 🚀 UNIVERSAL RESET & BASE */
+body {
+  background-color: var(--bg-hero) !important;
+  color: var(--text-primary);
+  font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
 
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -20,72 +41,91 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .animation-delay-300 {
-    animation-delay: 0.3s;
+  
+  /* 💎 GLASSMORPHISM UTILITY - Light Mode Calibrated */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
   }
 }
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ⚡ HIGH-IMPACT BUTTONS */
+.btn-hero {
+  background: var(--hero-pink);
+  color: white !important;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 24px rgba(248, 68, 100, 0.25);
+  border: none;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.btn-hero:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px var(--hero-pink-glow);
+  filter: brightness(1.1);
 }
 
-/* Custom Sleek Scrollbar */
+.btn-hero:active {
+  transform: scale(0.98);
+}
+
+/* 🎥 INTERACTIVE POSTER LIFT */
+.poster-hover {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.poster-hover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+/* 👆 UNIVERSAL INTERACTION */
+button, a, [role="button"], .cursor-pointer {
+  cursor: pointer !important;
+}
+
+button:disabled, [disabled] {
+  cursor: not-allowed !important;
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+
+/* Custom Clean Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
+  background: var(--bg-hero);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #9333ea, #3b82f6);
-  border-radius: 5px;
-  border: 2px solid rgba(0, 0, 0, 0.3);
+  background: #DDD;
+  border-radius: 10px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #a855f7, #60a5fa);
+  background: var(--hero-pink);
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #9333ea rgba(0, 0, 0, 0.3);
+  scrollbar-color: #DDD var(--bg-hero);
 }
 
-/* html2canvas Compatibility: Override modern OKLCH/OKLAB colors with HEX */
+/* html2canvas Compatibility for Hero Standard */
 .printable-ticket {
-  --color-zinc-950: #09090b !important;
-  --color-zinc-900: #18181b !important;
-  --color-zinc-800: #27272a !important;
-  --color-cyan-400: #22d3ee !important;
-  --color-cyan-500: #06b6d4 !important;
-  --color-green-400: #4ade80 !important;
-  --color-emerald-600: #059669 !important;
-  --color-red-600: #dc2626 !important;
+  --color-zinc-950: #FFFFFF !important;
+  --color-zinc-900: #F8F9FA !important;
+  --color-zinc-800: #E2E8F0 !important;
+  --color-hero-pink: #F84464 !important;
+  --color-green-400: #16a34a !important;
   --color-white: #ffffff !important;
   --color-black: #000000 !important;
-  color-scheme: dark !important;
+  color-scheme: light !important;
 }
 
 /* Professional A4 Ticket Printing */
@@ -141,67 +181,18 @@ code {
     z-index: 999999 !important;
   }
 
-  /* Specific color overrides for ticket elements */
-  .printable-ticket .text-cyan-400,
-  .printable-ticket .text-cyan-500,
-  .printable-ticket .ticket-user {
-    color: #0891b2 !important;
-  }
-
-  .printable-ticket .text-green-400,
-  .printable-ticket .text-emerald-600,
-  .printable-ticket .ticket-bill {
-    color: #16a34a !important;
-    border-color: #16a34a !important;
-  }
-
   /* Scaling fixes for A4 size */
   .printable-ticket h4 {
-    font-size: 30pt !important;
-    margin-bottom: 8mm !important;
+    font-size: 32pt !important;
+    margin-bottom: 10mm !important;
   }
 
   .printable-ticket p {
-    font-size: 14pt !important;
-    line-height: 1.4 !important;
+    font-size: 15pt !important;
+    line-height: 1.5 !important;
   }
 
-  .printable-ticket .text-lg {
-    font-size: 22pt !important;
-  }
-
-  .printable-ticket .text-sm {
-    font-size: 16pt !important;
-  }
-
-  /* Box and Grid adjustments for print */
-  .printable-ticket .bg-white\/2, 
-  .printable-ticket .bg-white\/5,
-  .printable-ticket .bg-zinc-800 {
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
-  }
-
-  /* QR code and images */
-  .printable-ticket .w-40,
-  .printable-ticket .h-40 {
-    width: 50mm !important;
-    height: 50mm !important;
-    margin: 5mm auto !important;
-  }
-
-  .printable-ticket .w-16,
-  .printable-ticket .h-24 {
-    width: 40mm !important;
-    height: 60mm !important;
-  }
-
-  .printable-ticket .animate-in,
-  .printable-ticket .zoom-in {
-    transform: none !important;
-  }
-
-  /* Hide digital-only buttons */
+  /* Ensure digital-only buttons are hidden */
   .print-hide {
     display: none !important;
     visibility: hidden !important;
@@ -212,4 +203,4 @@ code {
   .text-white {
     color: black !important;
   }
-}
+}
