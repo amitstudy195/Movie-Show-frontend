@@ -20,9 +20,14 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
         setLoading(true);
         try {
             const result = await signInWithPopup(auth, googleProvider);
+            
+            if (!result || !result.user) {
+                throw new Error("IDENTITY_REJECTED: Firebase did not return a valid user payload. Check Authorized Domains.");
+            }
+
             const user = result.user;
             
-            // Sync with our backend to get/create local user & JWT
+            // Sync with our backend
             const response = await api.post('/auth/google-login', {
                 name: user.displayName,
                 email: user.email,
@@ -30,22 +35,22 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                 uid: user.uid
             });
 
+            if (!response.data) {
+                throw new Error("BACKEND_DESYNC: The server did not provide an identity token.");
+            }
+
             const userData = response.data;
             localStorage.setItem('movie_user', JSON.stringify(userData));
             onLoginSuccess(userData);
             onClose();
         } catch (err) {
-            console.error("🕵️ Auth Trace:", err);
+            console.error("🕵️ IDENTITY_TRACE:", err);
             
-            let message = "Google Authentication failed.";
-            if (err.code === 'auth/operation-not-allowed') {
-                message = "ACTION REQUIRED: Please enable 'Google' as a Sign-In Provider in your Firebase Console (Authentication > Sign-in method).";
+            let message = err.message || "Google Authentication failed.";
+            if (err.code === 'auth/unauthorized-domain') {
+                message = "DOMAIN NOT AUTHORIZED: Add your Vercel URL to the Firebase Authorized Domains list.";
             } else if (err.code === 'auth/popup-blocked') {
-                message = "Handshake blocked: Please allow popups for this cinematic experience.";
-            } else if (err.code === 'auth/popup-closed-by-user') {
-                message = "The vault was closed before identity could be verified.";
-            } else {
-                message = err.response?.data?.message || "Internal identity sync failure. Please check terminal.";
+                message = "Handshake blocked: Please allow popups for this site.";
             }
             
             setError(message);
