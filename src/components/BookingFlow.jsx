@@ -67,6 +67,8 @@ const BookingFlow = ({ movie, user, allTheaters, allSchedules, selectedCity, onC
                 )}
                 {step === 2 && (
                     <SeatSelection 
+                        movieTitle={movie.title}
+                        showDate={selectedShowDate}
                         showtime={selectedShowtime}
                         theater={selectedTheater}
                         onBack={() => setStep(1)}

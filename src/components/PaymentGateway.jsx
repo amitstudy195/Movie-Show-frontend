@@ -150,6 +150,10 @@ const PaymentGateway = ({ amount, bookingDetails, onBack, onPaymentSuccess, addN
                         <span className="text-[#666666] font-black uppercase">Theater</span>
                         <span className="text-[#121212] uppercase truncate ml-4 text-right">{bookingDetails.theaterName}</span>
                     </div>
+                    <div className="flex justify-between text-[9px] font-bold">
+                        <span className="text-[#666666] font-black uppercase">Seats</span>
+                        <span className="text-[#f84464] uppercase truncate ml-4 text-right italic">{bookingDetails.seats?.join(', ')}</span>
+                    </div>
                 </div>
             </div>
 

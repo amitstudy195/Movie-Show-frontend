@@ -1,7 +1,21 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { bookingService } from '../services/api';
 
 const Showtimes = ({ movieId, movieTitle, selectedCity, onSelectShowtime, allTheaters, allSchedules }) => {
   const [selectedDay, setSelectedDay] = useState(0);
+  const [bookingCounts, setBookingCounts] = useState([]);
+
+  useEffect(() => {
+    const fetchOccupancy = async () => {
+      try {
+        const counts = await bookingService.getBookingCounts(movieTitle);
+        setBookingCounts(counts || []);
+      } catch (err) {
+        console.error("Failed to sync show popularity:", err);
+      }
+    };
+    if (movieTitle) fetchOccupancy();
+  }, [movieTitle]);
 
   // If data is still loading
   if (!allTheaters || (allTheaters.length === 0 && !selectedCity)) {
@@ -148,15 +162,25 @@ const Showtimes = ({ movieId, movieTitle, selectedCity, onSelectShowtime, allThe
               <div className="flex flex-wrap gap-4">
                 {theater.times.map((time, idx) => {
                     const isPast = isPastShowtime(time, selectedDay === 0);
-                    const isFillingFast = idx % 3 === 0;
+                    
+                    // ACCURATE POPULARITY LOGIC:
+                    const d = days[selectedDay];
+                    const showDateStr = `${d.date} ${d.month} ${d.day}`;
+                    const occupancy = bookingCounts.find(c => 
+                        c._id.theaterName === theater.name && 
+                        c._id.showtime === time && 
+                        c._id.showDate === showDateStr
+                    );
+                    const booked = occupancy?.bookedCount || 0;
+                    const total = (theater.rows || 8) * (theater.cols || 12);
+                    const isFillingFast = booked > (total * 0.5); // 50% capacity reached
 
                     return (
                       <div className="group relative" key={`time-${theater._id || theater.id || theater.name}-${idx}`}>
                           <button 
                               onClick={() => {
                                   if (isPast) return;
-                                  const d = days[selectedDay];
-                                  onSelectShowtime(time, theater, `${d.date} ${d.month} ${d.day}`);
+                                  onSelectShowtime(time, theater, showDateStr);
                               }}
                               disabled={isPast}
                               className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${
@@ -169,6 +193,7 @@ const Showtimes = ({ movieId, movieTitle, selectedCity, onSelectShowtime, allThe
                           >
                               {time}
                               {isPast && <span className="block text-[6px] opacity-40 mt-0.5">EXPIRED</span>}
+                              {!isPast && isFillingFast && <span className="block text-[6px] text-[#F84464] group-hover:text-white mt-0.5 animate-pulse">FILLING FAST</span>}
                           </button>
                       </div>
                     )

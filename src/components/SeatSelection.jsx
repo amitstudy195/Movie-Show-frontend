@@ -1,39 +1,44 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { bookingService } from '../services/api';
 
-const SeatSelection = ({ showtime, theater, onBack, onConfirm }) => {
+const SeatSelection = ({ movieTitle, showDate, showtime, theater, onBack, onConfirm }) => {
   const rows = Array.from({ length: theater?.rows || 8 }, (_, i) => String.fromCharCode(65 + i));
   const cols = Array.from({ length: theater?.cols || 12 }, (_, i) => i + 1);
   const PRICE_PER_SEAT = theater?.price || 150.00;
 
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [soldSeats, setSoldSeats] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Simulate sold seats based on showtime and theater name (making it consistent)
-  const soldSeats = useMemo(() => {
-    const seed = `${showtime}-${theater.name}`;
-    const seats = [];
-    const totalSeats = rows.length * cols.length;
-    // Generate ~15-20% random sold seats
-    const numSold = Math.floor(totalSeats * 0.15);
-    
-    let current = 0;
-    while (current < numSold) {
-        const randomRow = rows[Math.floor(Math.random() * rows.length)];
-        const randomCol = cols[Math.floor(Math.random() * cols.length)];
-        const id = `${randomRow}-${randomCol}`;
-        if (!seats.includes(id)) {
-            seats.push(id);
-            current++;
-        }
+  useEffect(() => {
+    const fetchBookedSeats = async () => {
+      setLoading(true);
+      try {
+        const booked = await bookingService.getBookedSeats({
+          movieTitle,
+          theaterName: theater.name,
+          showtime,
+          showDate
+        });
+        setSoldSeats(booked || []);
+      } catch (err) {
+        console.error('Failed to sync seat layout:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (movieTitle && theater?.name && showtime && showDate) {
+        fetchBookedSeats();
     }
-    return seats;
-  }, [showtime, theater]);
+  }, [movieTitle, theater, showtime, showDate]);
 
   // Split rows into categories for UI segmentation
   const executiveRows = rows.slice(0, Math.floor(rows.length / 2));
   const royalRows = rows.slice(Math.floor(rows.length / 2));
 
   const toggleSeat = (seatId) => {
-    if (soldSeats.includes(seatId)) return; // Prevent selecting sold seats
+    if (soldSeats.some(s => s.id === seatId)) return; // Prevent selecting sold seats
     setSelectedSeats(prev => 
       prev.includes(seatId) 
         ? prev.filter(s => s !== seatId) 
@@ -45,7 +50,9 @@ const SeatSelection = ({ showtime, theater, onBack, onConfirm }) => {
 
   const Seat = ({ id, col }) => {
     const isSelected = selectedSeats.includes(id);
-    const isSold = soldSeats.includes(id);
+    const bookingInfo = soldSeats.find(s => s.id === id);
+    const isSold = !!bookingInfo;
+    const isPending = bookingInfo?.status === 'pending';
 
     return (
         <button
@@ -53,14 +60,16 @@ const SeatSelection = ({ showtime, theater, onBack, onConfirm }) => {
             disabled={isSold}
             onClick={() => toggleSeat(id)}
             className={`w-7 h-7 rounded-md text-[9px] font-black transition-all border flex items-center justify-center ${
-                isSold 
+                isPending
+                ? 'bg-amber-400/20 border-amber-400/50 text-amber-600 cursor-not-allowed italic'
+                : isSold 
                 ? 'bg-[#E5E7EB] border-black/5 text-gray-400 cursor-not-allowed italic' 
                 : isSelected 
                 ? 'bg-[#F84464] border-[#F84464] text-white scale-110 shadow-lg shadow-[#F84464]/30' 
                 : 'bg-white border-black/10 text-[#666666] hover:border-[#F84464] hover:bg-[#F84464]/10 hover:text-[#F84464]'
             }`}
         >
-            {isSold ? '✕' : col}
+            {isPending ? '⌛' : isSold ? '✕' : col}
         </button>
     );
   }
@@ -80,7 +89,14 @@ const SeatSelection = ({ showtime, theater, onBack, onConfirm }) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-8 custom-scrollbar bg-white shadow-inner">
+      <div className="flex-1 overflow-auto p-8 custom-scrollbar bg-white shadow-inner relative">
+        {loading && (
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-in fade-in duration-300">
+                <div className="w-10 h-10 border-4 border-[#F84464]/20 border-t-[#F84464] rounded-full animate-spin mb-4"></div>
+                <p className="text-[10px] font-black text-[#121212] uppercase tracking-[0.3em] italic animate-pulse">Syncing Seat Layout...</p>
+            </div>
+        )}
+        
         {/* Screen Indicator */}
         <div className="flex flex-col items-center mb-20 opacity-80">
             <div className="w-full max-w-sm h-1 bg-gradient-to-r from-transparent via-[#F84464]/40 to-transparent shadow-[0_0_20px_rgba(248,68,100,0.2)]"></div>
@@ -139,6 +155,10 @@ const SeatSelection = ({ showtime, theater, onBack, onConfirm }) => {
             <div className="flex items-center gap-4">
                 <div className="w-6 h-6 rounded-lg bg-gray-100 text-gray-300 flex items-center justify-center text-[10px] font-black border border-black/5">✕</div>
                 <span className="text-[8px] font-black text-[#666666] uppercase tracking-widest italic">Sold Out</span>
+            </div>
+            <div className="flex items-center gap-4">
+                <div className="w-6 h-6 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center text-[10px] font-black border border-amber-400/20">⌛</div>
+                <span className="text-[8px] font-black text-[#666666] uppercase tracking-widest italic">In Process</span>
             </div>
         </div>
       </div>

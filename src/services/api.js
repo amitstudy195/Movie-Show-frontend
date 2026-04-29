@@ -66,6 +66,14 @@ export const bookingService = {
         const response = await api.get('/bookings/my');
         return response.data;
     },
+    async getBookedSeats(params) {
+        const response = await api.get('/bookings/booked-seats', { params });
+        return response.data;
+    },
+    async getBookingCounts(movieTitle) {
+        const response = await api.get('/bookings/counts', { params: { movieTitle } });
+        return response.data;
+    },
     async getAllBookings() {
         const response = await api.get('/bookings');
         return response.data;

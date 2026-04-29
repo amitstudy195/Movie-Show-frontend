@@ -506,6 +506,10 @@ const UserProfile = ({ user, onUpdateUser, onLogout, onClose, initialTab = 'prof
                                                         <p className="text-[8px] font-black text-[#666666] uppercase tracking-widest">Schedule</p>
                                                         <p className="text-[11px] font-bold text-[#121212] uppercase">{b.showDate} • {b.showtime}</p>
                                                     </div>
+                                                    <div>
+                                                        <p className="text-[8px] font-black text-[#666666] uppercase tracking-widest">Seats</p>
+                                                        <p className="text-[11px] font-bold text-[#f84464] uppercase tracking-tighter italic">{b.seats?.join(', ')}</p>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <button onClick={() => setSelectedTicket(b)} className="px-8 py-4 bg-[#121212] text-white rounded-2xl text-[10px] font-black uppercase hover:bg-[#f84464] transition-all active:scale-95 shadow-lg">View Ticket</button>
@@ -558,6 +562,17 @@ const UserProfile = ({ user, onUpdateUser, onLogout, onClose, initialTab = 'prof
                                         <p className="text-[#f84464] text-[9px] font-black uppercase tracking-[0.1em] mb-2 italic">{selectedTicket.userName || 'Superstar User'}</p>
                                         <p className="text-[#666666] text-[8px] font-bold uppercase tracking-widest">{selectedTicket.theaterName}</p>
                                         <p className="text-[#121212] font-black uppercase text-[10px] mt-2 italic">{selectedTicket.showDate} • {selectedTicket.showtime}</p>
+                                        
+                                        <div className="mt-4 pt-3 border-t border-black/5">
+                                            <p className="text-[8px] font-black text-[#666666] uppercase tracking-widest mb-1">Booked Seats</p>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {selectedTicket.seats?.map(seat => (
+                                                    <span key={seat} className="px-2 py-0.5 bg-[#f84464]/10 text-[#f84464] text-[9px] font-black rounded border border-[#f84464]/20 italic">
+                                                        {seat}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="flex flex-col items-center mb-8 gap-4">
